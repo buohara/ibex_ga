@@ -1,0 +1,48 @@
+CAPI=2:
+
+# Copyright lowRISC contributors.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: "lowrisc:ibex:ibex_ga_system_core"
+description: "Ibex system with GA coprocessor - core implementation"
+
+filesets:
+
+  files_rtl_ga_system:
+
+    depend:
+      - lowrisc:ibex:ibex_core
+
+    files:
+
+      # GA coprocessor implementation files
+      - rtl/ga_pkg.sv
+      - rtl/ga_register_file.sv
+      - rtl/ga_alu.sv
+      - rtl/ga_coprocessor.sv
+      
+      # GA override files (for modified Ibex components)
+      - rtl/ibex_override/ibex_core_ga.sv
+      
+      # Top-level GA system integration
+      - rtl/ibex_ga_system.sv
+
+    file_type: systemVerilogSource
+
+  files_lint_verilator:
+
+    files:
+    
+      - lint/ga_waiver.vlt: {file_type: vlt}
+
+targets:
+
+  default: &default_target
+
+    filesets:
+      - files_rtl_ga_system
+      - tool_verilator ? (files_lint_verilator)
+
+  lint:
+    <<: *default_target

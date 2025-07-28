@@ -12,7 +12,12 @@ help:
 
 # Use a parallel run (make -j N) for a faster build
 build-all: build-riscv-compliance build-simple-system build-arty-100 \
-      build-csr-test
+      build-csr-test build-ga-system
+
+.PHONY: clean
+clean:
+	rm -rf build/
+	rm -rf .fusesoc_cache/
 
 
 # RISC-V compliance
@@ -50,6 +55,55 @@ $(Vibex_simple_system):
 run-simple-system: sw-simple-hello | $(Vibex_simple_system)
 	build/lowrisc_ibex_ibex_simple_system_0/sim-verilator/Vibex_simple_system \
 		--raminit=$(simple-system-program)
+
+
+# GA System
+# Use the following targets:
+# - "build-ga-system"
+# - "run-ga-system"
+.PHONY: build-ga-system
+build-ga-system:	
+	fusesoc --cores-root=. run --target=sim --setup --build \
+		lowrisc:ibex:ibex_ga_system \
+		$(FUSESOC_CONFIG_OPTS)
+
+ga-system-program = examples/sw/ga_system/ga_test/ga_test.vmem
+sw-ga-test: $(ga-system-program)
+
+.PHONY: $(ga-system-program)
+$(ga-system-program):
+	cd examples/sw/ga_system/ga_test && $(MAKE)
+
+Vibex_ga_system = \
+      build/lowrisc_ibex_ibex_ga_system_0/sim-verilator/Vibex_ga_system
+$(Vibex_ga_system):
+	@echo "$@ not found"
+	@echo "Run \"make build-ga-system\" to create the dependency"
+	@false
+
+.PHONY: run-ga-system
+run-ga-system: sw-ga-test | $(Vibex_ga_system)
+	build/lowrisc_ibex_ibex_ga_system_0/sim-verilator/Vibex_ga_system \
+		--raminit=$(ga-system-program)
+
+# GA System with different configurations
+.PHONY: build-ga-system-conformal
+build-ga-system-conformal:
+	fusesoc --cores-root=. run --target=sim --setup --build \
+		lowrisc:ibex:ibex_ga_system \
+		$(FUSESOC_CONFIG_OPTS) --GARegFileSize=64
+
+.PHONY: build-ga-system-spacetime  
+build-ga-system-spacetime:
+	fusesoc --cores-root=. run --target=sim --setup --build \
+		lowrisc:ibex:ibex_ga_system \
+		$(FUSESOC_CONFIG_OPTS) --GARegFileSize=32
+
+# GA Lint check
+.PHONY: lint-ga-system
+lint-ga-system:
+	fusesoc --cores-root . run --target=lint lowrisc:ibex:ibex_ga_system_core \
+		$(FUSESOC_CONFIG_OPTS)
 
 
 # Arty A7 FPGA example

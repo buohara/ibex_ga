@@ -1,0 +1,213 @@
+CAPI=2:
+# Copyright lowRISC contributors.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+name: "lowrisc:ibex:ibex_ga_system"
+description: "Ibex system with Geometric Algebra coprocessor for simulation"
+
+filesets:
+
+  files_ga_system:
+
+    depend:
+
+      - lowrisc:ibex:ibex_ga_system_core
+
+    files:
+
+      - tool_verilator ? (ibex_ga_system_main.cc)
+
+    file_type: cppSource
+
+parameters:
+
+  RV32E:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 0
+    description: "Enable the E ISA extension (reduced register set) [0/1]"
+
+  RV32M:
+
+    datatype: str
+    default: ibex_pkg::RV32MFast
+    paramtype: vlogdefine
+    description: "RV32M implementation parameter enum. See the ibex_pkg::rv32m_e enum in ibex_pkg.sv for permitted values."
+
+  RV32B:
+
+    datatype: str
+    default: ibex_pkg::RV32BNone
+    paramtype: vlogdefine
+    description: "Bitmanip implementation parameter enum. See the ibex_pkg::rv32b_e enum in ibex_pkg.sv for permitted values."
+
+  RegFile:
+
+    datatype: str
+    default: ibex_pkg::RegFileFF
+    paramtype: vlogdefine
+    description: "Register file implementation parameter enum. See the ibex_pkg::regfile_e enum in ibex_pkg.sv for permitted values."
+
+  ICache:
+
+    datatype: int
+    default: 0
+    paramtype: vlogparam
+    description: "Enable instruction cache"
+
+  ICacheECC:
+
+    datatype: int
+    default: 0
+    paramtype: vlogparam
+    description: "Enable ECC protection in instruction cache"
+
+  ICacheScramble:
+
+    datatype: int
+    default: 0
+    paramtype: vlogparam
+    description: "Enable scrambling in instruction cache"
+
+  BranchTargetALU:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 0
+    description: "Enables separate branch target ALU (EXPERIMENTAL) [0/1]"
+
+  WritebackStage:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 0
+    description: "Enables third pipeline stage (EXPERIMENTAL) [0/1]"
+
+  BranchPredictor:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 0
+    description: "Enables static branch prediction (EXPERIMENTAL) [0/1]"
+
+  DbgTriggerEn:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 0
+    description: "Enables debug trigger support (EXPERIMENTAL) [0/1]"
+
+  SecureIbex:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 0
+    description: "Enables security hardening features (EXPERIMENTAL) [0/1]"
+
+  PMPEnable:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 0
+    description: "Enable PMP"
+
+  PMPGranularity:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 0
+    description: "Granularity of NAPOT range, must be >=0"
+
+  PMPNumRegions:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 4
+    description: "Number of PMP regions"
+
+  MHPMCounterNum:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 0
+    description: "Number of performance monitor counters"
+
+  MHPMCounterWidth:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 40
+    description: "Bit width of performance monitor counters"
+
+  # GA Coprocessor specific parameters
+
+  GAEnable:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 1
+    description: "Enable Geometric Algebra coprocessor [0/1]"
+
+  GARegFileSize:
+
+    datatype: int
+    paramtype: vlogparam
+    default: 32
+    description: "Number of GA coprocessor registers"
+
+targets:
+
+  default: &default_target
+
+    filesets:
+
+      - files_ga_system
+
+    parameters:
+
+      - RV32E
+      - RV32M
+      - RV32B
+      - RegFile
+      - ICache
+      - ICacheECC
+      - ICacheScramble
+      - BranchTargetALU
+      - WritebackStage
+      - BranchPredictor
+      - DbgTriggerEn
+      - SecureIbex
+      - PMPEnable
+      - PMPGranularity
+      - PMPNumRegions
+      - MHPMCounterNum
+      - MHPMCounterWidth
+      - GAEnable
+      - GARegFileSize
+
+  sim:
+    <<: *default_target
+    default_tool: verilator
+    toplevel: ibex_ga_system
+    tools:
+      vcs:
+        vcs_options:
+          - '-xlrm uniq_prior_final'
+          - '-debug_access+r'
+      verilator:
+        mode: cc
+        verilator_options:
+          # Disabling tracing reduces compile times but doesn't have a
+          # huge influence on runtime performance.
+          - '--trace'
+          - '--trace-fst' # this requires -DVM_TRACE_FMT_FST in CFLAGS below!
+          - '--trace-structs'
+          - '--trace-params'
+          - '--trace-max-array 1024'
+          - '-CFLAGS "-std=c++14 -Wall -DVM_TRACE_FMT_FST -DTOPLEVEL_NAME=ibex_ga_system -g"'
+          - '-LDFLAGS "-pthread -lutil -lelf"'
+          - "-Wall"
+          # RAM primitives wider than 64bit (required for ECC) fail to build in
+          # Verilator without increasing the unroll count (see Verilator#1266)
+          - "--unroll-count 72"
