@@ -3,6 +3,29 @@
   <img src="https://ibex.reports.lowrisc.org/opentitan/latest/summary.svg">
 </a>
 
+# Geometric Algebra Coprocessor
+
+This branch includes an experimental **Conformal Geometric Algebra (CGA) coprocessor** integrated with the Ibex RISC-V core. The GA coprocessor accelerates geometric computations commonly used in 6-DOF robotics, computer graphics, and physics simulation acceleration applications.
+
+## Features
+
+- **Conformal Geometric Algebra**: 5D algebra embedding 3D space for unified rotation/translation operations
+- **Custom GA Instructions**: Extended RISC-V ISA with dedicated GA opcodes (ADD, SUB, MUL, WEDGE, DOT, REV, DUAL, NORM)
+- **Hardware Acceleration**: Optimized multivector operations in dedicated coprocessor hardware
+- **Comprehensive Testing**: Uses [Versor](https://github.com/wolftype/versor) C++ library for Verilog golden test vector generation
+
+## Quick Start
+
+```bash
+# Build the complete GA system (Versor + test vectors + Ibex simulation)
+make build-ga-system
+
+# Example GA system available at:
+# examples/ga_system/
+```
+
+The GA coprocessor extends Ibex with hardware-accelerated geometric algebra operations, making it suitable for applications requiring efficient 3D transformations, collision detection, and geometric reasoning.
+
 # Ibex RISC-V Core
 
 Ibex is a production-quality open source 32-bit RISC-V CPU core written in

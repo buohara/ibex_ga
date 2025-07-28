@@ -1,0 +1,180 @@
+CAPI=2:
+# Copyright lowRISC contributors.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: lowrisc:ibex:ga_test_suite:0.1
+description: Test suite for GA (Geometric Algebra) coprocessor
+
+filesets:
+  files_rtl_ga:
+    files:
+      - ../rtl/ga_pkg.sv
+      - ../rtl/ga_coprocessor.sv
+      - ../rtl/ga_alu.sv
+      - ../rtl/ga_register_file.sv
+    file_type: systemVerilogSource
+
+  files_rtl_ibex:
+    depend:
+      - lowrisc:ibex:ibex_pkg
+    files:
+      - ../../../rtl/ibex_pkg.sv
+    file_type: systemVerilogSource
+
+  files_tb_unit:
+    files:
+      - rtl/tb_ga_operations.sv
+    file_type: systemVerilogSource
+
+  files_tb_integration:
+    files:
+      - rtl/tb_ga_coprocessor.sv
+    file_type: systemVerilogSource
+
+  files_vectors:
+    files:
+      - vectors/ga_test_inputs.mem: {is_include_path: true}
+      - vectors/ga_test_outputs.mem: {is_include_path: true}
+      - vectors/ga_test_control.mem: {is_include_path: true}
+    file_type: user
+
+targets:
+  default: &default_target
+    filesets:
+      - files_rtl_ibex
+      - files_rtl_ga
+      - files_tb_unit
+      - files_vectors
+    toplevel: tb_ga_operations
+
+  unit_test:
+    <<: *default_target
+    description: Unit tests for individual GA operations
+    default_tool: icarus
+    tools:
+      icarus:
+        iverilog_options:
+          - -g2012
+          - -DUNIT_TEST
+      modelsim:
+        vlog_options:
+          - -sv
+          - +define+UNIT_TEST
+      xsim:
+        xelab_options:
+          - --debug typical
+          - --relax
+
+  integration_test:
+    <<: *default_target
+    description: Integration tests for full GA coprocessor
+    filesets:
+      - files_rtl_ibex
+      - files_rtl_ga
+      - files_tb_integration
+      - files_vectors
+    toplevel: tb_ga_coprocessor
+    tools:
+      icarus:
+        iverilog_options:
+          - -g2012
+          - -DINTEGRATION_TEST
+      modelsim:
+        vlog_options:
+          - -sv
+          - +define+INTEGRATION_TEST
+
+  verilator_test:
+    <<: *default_target
+    description: High-performance Verilator-based testing
+    toplevel: tb_ga_coprocessor
+    default_tool: verilator
+    tools:
+      verilator:
+        mode: cc
+        verilator_options:
+          - --trace
+          - --trace-depth 2
+          - --exe
+          - --build
+          - -Wall
+          - -Wno-WIDTH
+          - -Wno-UNOPTFLAT
+
+  lint:
+    <<: *default_target
+    description: Lint checking for GA coprocessor
+    default_tool: verilator
+    toplevel: ga_coprocessor
+    tools:
+      verilator:
+        mode: lint-only
+        verilator_options:
+          - -Wall
+          - -Wno-WIDTH
+
+  formal:
+    <<: *default_target
+    description: Formal verification setup
+    filesets:
+      - files_rtl_ibex
+      - files_rtl_ga
+    default_tool: symbiyosys
+    toplevel: ga_coprocessor
+    tools:
+      symbiyosys:
+        tasknames: [prove, cover]
+
+scripts:
+  generate_vectors:
+    cmd:
+      - python3
+      - generate_advanced_vectors.py
+    description: Generate test vectors using golden reference
+
+  compile_generator:
+    cmd:
+      - g++
+      - -std=c++17
+      - -O2
+      - -o
+      - generate_test_vectors
+      - generate_test_vectors.cpp
+    description: Compile C++ test vector generator
+
+  run_tests:
+    cmd:
+      - make
+      - all
+    description: Run complete test suite
+
+parameters:
+  NUM_TESTS:
+    datatype: int
+    default: 1000
+    paramtype: vlogparam
+    description: Number of test vectors to run
+
+  ENABLE_COVERAGE:
+    datatype: bool
+    default: false
+    paramtype: vlogdefine
+    description: Enable coverage collection
+
+  ENABLE_ASSERTIONS:
+    datatype: bool
+    default: true
+    paramtype: vlogdefine
+    description: Enable assertion checking
+
+  TIMEOUT_CYCLES:
+    datatype: int
+    default: 10000
+    paramtype: vlogparam
+    description: Simulation timeout in cycles
+
+provider:
+  name: github
+  user: buohara
+  repo: ibex

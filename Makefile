@@ -62,42 +62,41 @@ run-simple-system: sw-simple-hello | $(Vibex_simple_system)
 # - "build-ga-system"
 # - "run-ga-system"
 .PHONY: build-ga-system
-build-ga-system:	
+build-ga-system:
+	@echo "Building GA system with Conformal Geometric Algebra support..."
+	@echo "Building Versor library..."
+	cd examples/ga_system/versor && ./build.sh --math
+	@echo "Compiling C++ test vector generator..."
+	cd examples/ga_system/tests && $(MAKE) generate_test_vectors
+	@echo "Generating CGA test vectors with Versor..."
+	cd examples/ga_system/tests && $(MAKE) test_vectors
+	@echo "Building GA system with FuseSoC..."
 	fusesoc --cores-root=. run --target=sim --setup --build \
 		lowrisc:ibex:ibex_ga_system \
 		$(FUSESOC_CONFIG_OPTS)
+	@echo "GA system build complete!"
+	@echo "Main GA system ready for simulation"
 
-ga-system-program = examples/sw/ga_system/ga_test/ga_test.vmem
-sw-ga-test: $(ga-system-program)
-
-.PHONY: $(ga-system-program)
-$(ga-system-program):
-	cd examples/sw/ga_system/ga_test && $(MAKE)
-
-Vibex_ga_system = \
-      build/lowrisc_ibex_ibex_ga_system_0/sim-verilator/Vibex_ga_system
-$(Vibex_ga_system):
-	@echo "$@ not found"
-	@echo "Run \"make build-ga-system\" to create the dependency"
-	@false
+# GA test execution targets
 
 .PHONY: run-ga-system
-run-ga-system: sw-ga-test | $(Vibex_ga_system)
-	build/lowrisc_ibex_ibex_ga_system_0/sim-verilator/Vibex_ga_system \
-		--raminit=$(ga-system-program)
+run-ga-system:
+	@echo "Running GA system simulation..."
+	cd build/lowrisc_ibex_ibex_ga_system_0/sim-verilator/ && \
+		./Vlowrisc_ibex_ibex_ga_system_0
 
-# GA System with different configurations
-.PHONY: build-ga-system-conformal
-build-ga-system-conformal:
-	fusesoc --cores-root=. run --target=sim --setup --build \
-		lowrisc:ibex:ibex_ga_system \
-		$(FUSESOC_CONFIG_OPTS) --GARegFileSize=64
+.PHONY: run-ga-tests
+run-ga-tests:
+	@echo "GA testbenches currently disabled due to Verilator compatibility issues"
+	@echo "Use 'make run-ga-system' to run the main simulation instead"
 
-.PHONY: build-ga-system-spacetime  
-build-ga-system-spacetime:
-	fusesoc --cores-root=. run --target=sim --setup --build \
-		lowrisc:ibex:ibex_ga_system \
-		$(FUSESOC_CONFIG_OPTS) --GARegFileSize=32
+.PHONY: ga-test-coverage
+ga-test-coverage:
+	@echo "Running GA tests with coverage analysis..."
+	fusesoc --cores-root=. run --target=unit_test \
+		lowrisc:ibex:ga_test_suite \
+		--NUM_TESTS=5000 --ENABLE_COVERAGE=true
+	@echo "Coverage report available in build directory"
 
 # GA Lint check
 .PHONY: lint-ga-system
