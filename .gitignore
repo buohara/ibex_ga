@@ -25,4 +25,6 @@ modelsim.ini
 examples/ga_system/tests/vectors/
 examples/ga_system/tests/generate_test_vectors
 examples/ga_system/versor/build/
+examples/ga_system/tests/obj_dir
+examples/ga_system/tests/ga_test_verbose.log
 

@@ -77,33 +77,12 @@ build-ga-system:
 	@echo "GA system build complete!"
 	@echo "Main GA system ready for simulation"
 
-# GA test execution targets
-
-.PHONY: run-ga-system
-run-ga-system:
-	@echo "Running GA system simulation..."
-	cd build/lowrisc_ibex_ibex_ga_system_0/sim-verilator/ && \
-		./Vlowrisc_ibex_ibex_ga_system_0
-
-.PHONY: run-ga-tests
-run-ga-tests:
-	@echo "GA testbenches currently disabled due to Verilator compatibility issues"
-	@echo "Use 'make run-ga-system' to run the main simulation instead"
-
-.PHONY: ga-test-coverage
-ga-test-coverage:
-	@echo "Running GA tests with coverage analysis..."
-	fusesoc --cores-root=. run --target=unit_test \
-		lowrisc:ibex:ga_test_suite \
-		--NUM_TESTS=5000 --ENABLE_COVERAGE=true
-	@echo "Coverage report available in build directory"
-
-# GA Lint check
-.PHONY: lint-ga-system
-lint-ga-system:
-	fusesoc --cores-root . run --target=lint lowrisc:ibex:ibex_ga_system_core \
-		$(FUSESOC_CONFIG_OPTS)
-
+.PHONY: simulate-ga-system
+simulate-ga-system: build-ga-system
+	@echo "Running GA coprocessor unit tests with Verilator..."
+	cd examples/ga_system/tests && $(MAKE) simulate
+	@echo "GA coprocessor simulation complete!"
+	@echo "Check examples/ga_system/tests/ga_test_verbose.log for detailed results"
 
 # Arty A7 FPGA example
 # Use the following targets (depending on your hardware):

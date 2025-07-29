@@ -13,6 +13,8 @@ VECTORS_DIR = vectors
 
 # Compiler flags
 CXXFLAGS = -std=c++17 -O2 -Wall -Wextra
+CXXFLAGS += -I../versor/include -I../versor/build/include -I../versor
+LDFLAGS += -L../versor/build -lvsr
 
 # Versor configuration  
 VERSOR_INCLUDE = ../versor/include
@@ -39,29 +41,58 @@ generate_test_vectors: generate_test_vectors.cpp
 		$(CXX) $(CXXFLAGS) -DUSE_SIMPLIFIED_GA -o $@ $<; \
 	else \
 		echo "Using Versor Conformal Geometric Algebra library"; \
-		$(CXX) $(CXXFLAGS) -I$(VERSOR_INCLUDE) -L$(VERSOR_BUILD_DIR) -lvsr -o $@ $<; \
+		$(CXX) $(CXXFLAGS) -o $@ $<; \
 	fi
 
-# Clean targets
-clean:
-	rm -f generate_test_vectors
+# Simulation configuration
+RTL_DIR = ../rtl
+TB_DIR = rtl
+WAVES ?= 0
 
-clean_vectors:
+# Verilator flags with proper package includes and timing
+VERILATOR_FLAGS = --cc --binary --build -Wall --top-module tb_ga_coprocessor
+VERILATOR_FLAGS += +incdir+$(RTL_DIR) +incdir+$(TB_DIR)
+VERILATOR_FLAGS += +incdir+../../../rtl
+VERILATOR_FLAGS += -CFLAGS "-std=c++14" -Wno-UNUSED -Wno-UNDRIVEN
+VERILATOR_FLAGS += --timing  # Enable timing for Verilator compatibility
+VERILATOR_FLAGS += -Wno-DECLFILENAME -Wno-TIMESCALEMOD
+
+ifeq ($(WAVES),1)
+    VERILATOR_FLAGS += --trace
+endif
+
+# Main simulation target - fix duplicate package issue
+simulate: test_vectors $(RTL_DIR)/*.sv $(TB_DIR)/tb_ga_coprocessor.sv
+	@echo "Running Verilator simulation..."
+	verilator $(VERILATOR_FLAGS) \
+		../../../rtl/ibex_pkg.sv \
+		$(RTL_DIR)/ga_pkg.sv \
+		$(RTL_DIR)/ga_alu.sv \
+		$(RTL_DIR)/ga_coprocessor.sv \
+		$(RTL_DIR)/ga_register_file.sv \
+		$(TB_DIR)/tb_ga_coprocessor.sv
+	@echo "Executing simulation..."
+	./obj_dir/Vtb_ga_coprocessor $(if $(filter 1,$(WAVES)),+WAVES)
+	@echo ""
+	@echo "=== Simulation Complete ==="
+	@echo "Results: ga_test_verbose.log"
+	@if [ -f ga_coprocessor_test.vcd ]; then \
+		echo "Waveform: ga_coprocessor_test.vcd (view with: gtkwave ga_coprocessor_test.vcd)"; \
+	fi
+
+# Clean artifacts
+clean:
+	rm -rf obj_dir/
+	rm -f *.log *.vcd
 	rm -rf $(VECTORS_DIR)
 
-clean_all: clean clean_vectors
-
+# Help
 help:
-	@echo "GA Test Vector Generator"
-	@echo "======================="
+	@echo "Verilator Simulation:"
+	@echo "  make simulate          - Run simulation"
+	@echo "  make simulate WAVES=1  - Run with waveforms"
+	@echo "  make clean            - Clean artifacts"
 	@echo ""
-	@echo "This Makefile only handles test vector generation."
-	@echo "Use the main Makefile's 'build-ga-system' target for full builds."
-	@echo ""
-	@echo "Targets:"
-	@echo "  test_vectors     - Generate CGA test vectors using Versor"
-	@echo "  clean           - Clean compiled generator"
-	@echo "  clean_all       - Clean everything including vectors"
-	@echo "  help            - Show this help"
+	@echo "View waveforms: gtkwave ga_coprocessor_test.vcd"
 
-.PHONY: all test_vectors clean clean_vectors clean_all help
+.PHONY: all test_vectors clean clean_vectors clean_all help simulate
