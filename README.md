@@ -16,7 +16,6 @@ This branch includes an experimental **Conformal Geometric Algebra (CGA) coproce
 - **Conformal Geometric Algebra**: 5D algebra embedding 3D space for unified rotation/translation operations
 - **Custom GA Instructions**: Extended RISC-V ISA with dedicated GA opcodes (ADD, SUB, MUL, WEDGE, DOT, REV, DUAL, NORM)
 - **Hardware Acceleration**: Optimized multivector operations in dedicated coprocessor hardware
-- **Comprehensive Testing**: Uses [Versor](https://github.com/wolftype/versor) C++ library for Verilog golden test vector generation
 
 ## Quick Start
 
