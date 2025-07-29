@@ -1,20 +1,16 @@
-[Ibex OpenTitan configuration Nightly Regression](https://ibex.reports.lowrisc.org/opentitan/latest/report.html)
-<a href="https://ibex.reports.lowrisc.org/opentitan/latest/report.html">
-  <img src="https://ibex.reports.lowrisc.org/opentitan/latest/summary.svg">
-</a>
-
-> **⚠️ Project Status: Active Development** | **Latest Update: 2025-01-29**
+> **⚠Project Status: Active Development** | **Latest Update: 07/29/2025**
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
 [![Test Coverage](https://img.shields.io/badge/coverage-85%25-green)](#)
 
-## 🚀 Quick Status Overview
+Ibex + GA Core are implemented under examples/ga_system, with ga-specific RTL and overrides of ibex_decoder.sv, ibex_pkg.sv, etc for GA-specific signals and op code integration with Ibex. This folder also constains a test vector generation program for randomized and corner case unit tests for various GA opcodes. A GA coprocessor-only testbench is included. Simulation is done with Verilator.
 
 | Component | Status | Progress |
 |-----------|--------|----------|
-| **GA Coprocessor RTL** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
-| **GA Coprocessor Testbench** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
-| **Ibex + GA Core Integration** | 🔄 In Progress | ![70%](https://progress-bar.dev/70) |
+| **GA Coprocessor RTL Implementation** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
+| **GA Coprocessor Testbench Implementation** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
+| **GA Coprocessor Testbench Validation** | 🔄 In Progress | ![50%](https://progress-bar.dev/50) |
+| **Ibex + GA Core Integration** | 🔄 In Progress | ![40%](https://progress-bar.dev/40) |
 
 # Geometric Algebra Coprocessor
 
