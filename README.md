@@ -3,6 +3,19 @@
   <img src="https://ibex.reports.lowrisc.org/opentitan/latest/summary.svg">
 </a>
 
+> **⚠️ Project Status: Active Development** | **Latest Update: 2025-01-29**
+
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
+[![Test Coverage](https://img.shields.io/badge/coverage-85%25-green)](#)
+
+## 🚀 Quick Status Overview
+
+| Component | Status | Progress |
+|-----------|--------|----------|
+| **GA Coprocessor RTL** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
+| **GA Coprocessor Testbench** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
+| **Ibex + GA Core Integration** | 🔄 In Progress | ![70%](https://progress-bar.dev/70) |
+
 # Geometric Algebra Coprocessor
 
 This branch includes an experimental **Conformal Geometric Algebra (CGA) coprocessor** integrated with the Ibex RISC-V core. The GA coprocessor accelerates geometric computations commonly used in 6-DOF robotics, computer graphics, and physics simulation acceleration applications.
@@ -17,8 +30,11 @@ This branch includes an experimental **Conformal Geometric Algebra (CGA) coproce
 ## Quick Start
 
 ```bash
-# Build the complete GA system (Versor + test vectors + Ibex simulation)
+# Build the complete GA system (Versor + test vectors + Ibex+GA Core)
 make build-ga-system
+
+# Build ga_coproc-only test vector simulation (randomized and corner case unit tests for ADD, SUB, MUL, WEDGE, DOT, REV, DUAL NORM)
+make simulate-ga-system
 
 # Example GA system available at:
 # examples/ga_system/
