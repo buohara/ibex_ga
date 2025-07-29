@@ -1,10 +1,5 @@
 > **⚠Project Status: Active Development** | **Latest Update: 07/29/2025**
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![Test Coverage](https://img.shields.io/badge/coverage-85%25-green)](#)
-
-Ibex + GA Core are implemented under examples/ga_system, with ga-specific RTL and overrides of ibex_decoder.sv, ibex_pkg.sv, etc for GA-specific signals and op code integration with Ibex. This folder also constains a test vector generation program for randomized and corner case unit tests for various GA opcodes. A GA coprocessor-only testbench is included. Simulation is done with Verilator.
-
 | Component | Status | Progress |
 |-----------|--------|----------|
 | **GA Coprocessor RTL Implementation** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
@@ -24,6 +19,8 @@ This branch includes an experimental **Conformal Geometric Algebra (CGA) coproce
 - **Comprehensive Testing**: Uses [Versor](https://github.com/wolftype/versor) C++ library for Verilog golden test vector generation
 
 ## Quick Start
+
+Ibex + GA Core are implemented under **examples/ga_system** with ga-specific RTL and overrides of ibex_decoder.sv, ibex_pkg.sv, etc for GA-specific signals and op code integration with Ibex. This folder also constains a test vector generation program for randomized and corner case unit tests for various GA opcodes. A GA coprocessor-only testbench is included. Simulation is done with Verilator.
 
 ```bash
 # Build the complete GA system (Versor + test vectors + Ibex+GA Core)
