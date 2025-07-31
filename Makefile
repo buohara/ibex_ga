@@ -80,7 +80,7 @@ build-ga-system:
 .PHONY: simulate-ga-system
 simulate-ga-system: build-ga-system
 	@echo "Running GA coprocessor unit tests with Verilator..."
-	cd examples/ga_system/tests && $(MAKE) simulate
+	cd examples/ga_system/tests && $(MAKE) simulate WAVES=1
 	@echo "GA coprocessor simulation complete!"
 	@echo "Check examples/ga_system/tests/ga_test_verbose.log for detailed results"
 
