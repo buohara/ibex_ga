@@ -134,6 +134,7 @@ package ga_pkg;
     max_grade0 = (mv.scalar[GA_MV_WIDTH-1]) ? ~mv.scalar + 1 : mv.scalar;
     
     max_grade1 = (mv.e1[GA_MV_WIDTH-1]) ? ~mv.e1 + 1 : mv.e1;
+
     max_grade1 = ((mv.e2[GA_MV_WIDTH-1]) ? ~mv.e2 + 1 : mv.e2) > max_grade1 ? 
                  ((mv.e2[GA_MV_WIDTH-1]) ? ~mv.e2 + 1 : mv.e2) : max_grade1;
     max_grade1 = ((mv.e3[GA_MV_WIDTH-1]) ? ~mv.e3 + 1 : mv.e3) > max_grade1 ? 
@@ -144,6 +145,7 @@ package ga_pkg;
                  ((mv.ei[GA_MV_WIDTH-1]) ? ~mv.ei + 1 : mv.ei) : max_grade1;
     
     max_grade2 = (mv.e12[GA_MV_WIDTH-1]) ? ~mv.e12 + 1 : mv.e12;
+
     max_grade2 = ((mv.e13[GA_MV_WIDTH-1]) ? ~mv.e13 + 1 : mv.e13) > max_grade2 ? 
                  ((mv.e13[GA_MV_WIDTH-1]) ? ~mv.e13 + 1 : mv.e13) : max_grade2;
     max_grade2 = ((mv.e23[GA_MV_WIDTH-1]) ? ~mv.e23 + 1 : mv.e23) > max_grade2 ? 
@@ -158,6 +160,7 @@ package ga_pkg;
     max_grade5 = (mv.e123oi[GA_MV_WIDTH-1]) ? ~mv.e123oi + 1 : mv.e123oi;
     
     dominant_grade = 3'b000;
+    
     if (max_grade1 > max_grade0) dominant_grade = 3'b001;
     if (max_grade2 > max_grade1 && max_grade2 > max_grade0) dominant_grade = 3'b010;
     if (max_grade3 > max_grade2 && max_grade3 > max_grade1 && max_grade3 > max_grade0) dominant_grade = 3'b011;

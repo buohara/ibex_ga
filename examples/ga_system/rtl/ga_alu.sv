@@ -55,7 +55,7 @@ module ga_alu
       alu_state_q <= alu_state_d;
       result_q    <= result_d;
       error_q     <= error_d;
-      
+
     end
 
   end
@@ -205,7 +205,7 @@ module ga_alu
       end
 
       GA_FUNCT_NORM: begin
-        result.scalar = normCalculation(a);
+        result = normCalculation(a);
       end
 
       GA_FUNCT_ROTATE: begin

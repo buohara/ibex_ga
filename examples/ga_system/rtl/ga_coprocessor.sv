@@ -127,8 +127,6 @@ module ga_coprocessor
 
         ga_resp_o.busy = 1'b1;
 
-        $display("GA Coprocessor: DECODE state, funct=%0d", ga_req_q.funct);
-
         case (ga_req_q.funct)
 
           GA_FUNCT_ADD, GA_FUNCT_SUB: begin
@@ -163,17 +161,12 @@ module ga_coprocessor
 
       GA_READ_REGS: begin
 
-        $display("GA Coprocessor: READ_REGS state, ga_reg_a=%0d, ga_reg_b=%0d", 
-                 ga_req_q.ga_reg_a, ga_req_q.ga_reg_b);
-
         ga_resp_o.busy  = 1'b1;
         ga_state_d      = GA_EXECUTE;
 
       end
 
       GA_EXECUTE: begin
-
-        $display("GA Coprocessor: EXECUTE state, funct=%0d", ga_req_q.funct);
 
         ga_resp_o.busy  = 1'b1;
         ga_alu_valid    = 1'b1;
@@ -195,8 +188,6 @@ module ga_coprocessor
 
       GA_WRITE_BACK: begin
 
-        $display("GA Coprocessor: WRITE_BACK state, result=%0h", ga_result_q);
-
         ga_resp_o.valid  = 1'b1;
         ga_resp_o.result = ga_result_q;
         ga_resp_o.busy   = 1'b0;
@@ -211,8 +202,6 @@ module ga_coprocessor
 
       GA_HOLD_VALID: begin
 
-        $display("GA Coprocessor: HOLD_VALID state");
-
         ga_resp_o.valid = 1'b1;
         ga_resp_o.ready = 1'b0;
         ga_state_d      = GA_IDLE;
@@ -221,8 +210,6 @@ module ga_coprocessor
 
       GA_ERROR: begin
 
-        $display("GA Coprocessor: ERROR state, invalid operation");
-
         ga_resp_o.valid = 1'b1;
         ga_resp_o.error = 1'b1;
         ga_state_d      = GA_IDLE;
@@ -230,8 +217,6 @@ module ga_coprocessor
       end
 
       default: begin
-
-        $display("GA Coprocessor: Unknown state %0d", ga_state_q);
 
         ga_state_d = GA_IDLE;
 

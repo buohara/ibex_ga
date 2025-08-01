@@ -23,7 +23,6 @@ make build-ga-system
 
 This executes:
 ```bash
-cd examples/ga_system/versor && ./build.sh --math          # Build Versor CGA library
 cd examples/ga_system/tests && make generate_test_vectors  # Compile C++ generator
 cd examples/ga_system/tests && make test_vectors           # Generate test vectors  
 fusesoc run --target=sim --setup --build lowrisc:ibex:ibex_ga_system        # Build simulation
@@ -64,20 +63,11 @@ make build-ga-system
 # Just generate test vectors (from tests/ directory)
 make test_vectors
 
-# Just build Versor library (from versor/ directory) 
-./build.sh --math
-```
-
-## Using Versor for Golden Reference
-
-The test vector generator uses [Versor](https://github.com/wolftype/versor) Conformal Geometric Algebra library for exact GA calculations as the golden reference.
-
 ### How it Works:
 
-1. **Versor Library Build**: The `build-ga-system` target first builds the Versor C++ library
-2. **CGA Test Generation**: Our C++ generator uses Versor's CGA types and operations
-3. **Golden Reference**: Versor provides mathematically correct results for verification
-4. **Fallback Mode**: If Versor isn't built, uses simplified GA implementation
+1. **CGA Test Generation**: Our C++ generator uses Versor's CGA types and operations
+2. **Golden Reference**: Versor provides mathematically correct results for verification
+3. **Fallback Mode**: If Versor isn't built, uses simplified GA implementation
 
 ### Test Vector Generation:
 
@@ -182,21 +172,6 @@ The testbenches include comprehensive SystemVerilog assertions:
 - **FuseSoC** (for Ibex+GA system build)
 
 ## Troubleshooting
-
-### Versor not built:
-```
-Warning: Versor not built - using simplified GA implementation
-```
-**Solution**: Run `make build-ga-system` from ibex root, or manually build Versor:
-```bash
-cd examples/ga_system/versor && ./build.sh --math
-```
-
-### CMake errors in Versor build:
-```
-CMake Error: ext/gtest does not contain CMakeLists.txt
-```
-**Solution**: This is expected - Versor's testing components are disabled for integration.
 
 ### Simulation errors:
 ```bash

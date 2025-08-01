@@ -12,13 +12,7 @@ CXX = g++
 VECTORS_DIR = vectors
 
 # Compiler flags
-CXXFLAGS = -std=c++17 -O2 -Wall -Wextra
-CXXFLAGS += -I../versor/include -I../versor/build/include -I../versor
-LDFLAGS += -L../versor/build -lvsr
-
-# Versor configuration  
-VERSOR_INCLUDE = ../versor/include
-VERSOR_BUILD_DIR = ../versor/build
+CXXFLAGS = -std=c++17 -O0 -g3 -Wall -Wextra -DDEBUG
 
 # Check if Versor is built
 VERSOR_BUILT := $(shell test -f "$(VERSOR_BUILD_DIR)/libvsr.a" && echo "true" || echo "false")

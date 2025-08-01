@@ -64,8 +64,6 @@ run-simple-system: sw-simple-hello | $(Vibex_simple_system)
 .PHONY: build-ga-system
 build-ga-system:
 	@echo "Building GA system with Conformal Geometric Algebra support..."
-	@echo "Building Versor library..."
-	cd examples/ga_system/versor && ./build.sh --math
 	@echo "Compiling C++ test vector generator..."
 	cd examples/ga_system/tests && $(MAKE) generate_test_vectors
 	@echo "Generating CGA test vectors with Versor..."

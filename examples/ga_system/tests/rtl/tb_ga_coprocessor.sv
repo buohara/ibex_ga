@@ -13,9 +13,9 @@ module tb_ga_coprocessor;
 
   import ga_pkg::*;
 
-  parameter int NUM_TESTS = 300;
-  parameter int CLK_PERIOD = 10;
-  
+  parameter int NUM_TESTS   = 712;
+  parameter int CLK_PERIOD  = 10;
+
   logic clk;
   logic rst_n;
   
@@ -34,7 +34,7 @@ module tb_ga_coprocessor;
   logic test_complete;
   
   logic [1024:0] test_inputs_mem  [0:NUM_TESTS-1];
-  logic [512:0] test_outputs_mem [0:NUM_TESTS-1];
+  logic [511:0] test_outputs_mem [0:NUM_TESTS-1];
   logic [3:0]  test_control_mem [0:NUM_TESTS-1];
   
   logic        unused_ga_debug_req;
@@ -55,8 +55,11 @@ module tb_ga_coprocessor;
   );
 
   class GATestLogger;
+
     integer log_file;
-    string operation_names[12] = {
+    
+    string operation_names[12] = 
+    {
       "ADD", "SUB", "MUL", "WEDGE", "DOT", "DUAL", 
       "REV", "NORM", "LOAD", "STORE", "ROTATE", "REFLECT"
     };
@@ -66,29 +69,34 @@ module tb_ga_coprocessor;
     int op_fails[12];
     
     function new();
+
       log_file = $fopen("ga_test_verbose.log", "w");
+      
       if (log_file == 0) begin
         $error("Could not create verbose log file");
       end
       
       for (int i = 0; i < 12; i++) begin
+
         op_counts[i] = 0;
         op_passes[i] = 0;
         op_fails[i] = 0;
+
       end
       
       $fwrite(log_file, "=== GA Coprocessor Verbose Test Log ===\n");
       $fwrite(log_file, "Format: TEST_ID | OPERATION | OPERAND_A | OPERAND_B | EXPECTED | ACTUAL | STATUS\n");
       $fwrite(log_file, "================================================================================\n\n");
+    
     endfunction
     
     function void log_test_result(
       int test_id, 
       int op_code, 
-      logic [31:0] operand_a, 
-      logic [31:0] operand_b,
-      logic [31:0] expected,
-      logic [31:0] actual,
+      ga_multivector_t operand_a, 
+      ga_multivector_t operand_b,
+      ga_multivector_t expected,
+      ga_multivector_t actual,
       bit passed,
       bit error_flag,
       bit overflow_flag,
@@ -98,13 +106,14 @@ module tb_ga_coprocessor;
       string flags_str = "";
       
       op_counts[op_code]++;
+      
       if (passed) op_passes[op_code]++;
       else op_fails[op_code]++;
       
       status_str = passed ? "PASS" : "FAIL";
       
-      if (error_flag) flags_str = {flags_str, " ERROR"};
-      if (overflow_flag) flags_str = {flags_str, " OVERFLOW"};
+      if (error_flag) flags_str     = {flags_str, " ERROR"};
+      if (overflow_flag) flags_str  = {flags_str, " OVERFLOW"};
       if (underflow_flag) flags_str = {flags_str, " UNDERFLOW"};
       
       $fwrite(log_file, "%5d | %8s | %08x | %08x | %08x | %08x | %s%s\n",
@@ -112,47 +121,66 @@ module tb_ga_coprocessor;
               expected, actual, status_str, flags_str);
               
       if (test_id % 100 == 0) begin
+
         $fflush(log_file);
+
       end
+
     endfunction
     
     function void write_operation_summary();
+
       $fwrite(log_file, "\n\n=== Results by Operation ===\n");
       $fwrite(log_file, "Operation | Total | Passed | Failed | Pass Rate\n");
       $fwrite(log_file, "----------|-------|--------|--------|----------\n");
       
       for (int i = 0; i < 12; i++) begin
+
         if (op_counts[i] > 0) begin
+
           real pass_rate = (real'(op_passes[i]) / real'(op_counts[i])) * 100.0;
           $fwrite(log_file, "%8s  | %5d | %6d | %6d | %7.2f%%\n",
                   operation_names[i], op_counts[i], op_passes[i], op_fails[i], pass_rate);
+
         end
+
       end
       
       $fwrite(log_file, "\n=== Failed Tests by Operation ===\n");
+
       for (int op = 0; op < 12; op++) begin
+
         if (op_fails[op] > 0) begin
+
           $fwrite(log_file, "\n%s Failures (%d total):\n", operation_names[op], op_fails[op]);
           $fwrite(log_file, "Use 'grep \"| %s |.*FAIL\"' to find all %s failures\n", 
                   operation_names[op], operation_names[op]);
+
         end
+
       end
+
     endfunction
     
     function void close();
+
       write_operation_summary();
       $fclose(log_file);
+
     endfunction
+
   endclass
 
   GATestLogger logger;
   
   initial begin
+
     $display("Loading test vectors...");
-    $readmemh("vectors/ga_test_inputs.mem", test_inputs_mem);
-    $readmemh("vectors/ga_test_outputs.mem", test_outputs_mem);
-    $readmemh("vectors/ga_test_control.mem", test_control_mem);
+    $readmemh("vectors/cga_test_inputs.mem", test_inputs_mem);
+    $readmemh("vectors/cga_test_outputs.mem", test_outputs_mem);
+    $readmemh("vectors/cga_test_control.mem", test_control_mem);
     $display("Test vectors loaded successfully");
+
   end
   
   initial begin
@@ -214,6 +242,7 @@ module tb_ga_coprocessor;
   end
   
   task run_single_test(int test_index);
+
     logic [511:0] operand_a, operand_b;
     logic [511:0] expected_result;
     logic [3:0]  function_code;
@@ -228,7 +257,7 @@ module tb_ga_coprocessor;
     expected_result         = test_outputs_mem[test_index];
     function_code           = test_control_mem[test_index];
     
-    should_continue = 1'b1;
+    should_continue         = 1'b1;
     
     ga_req.valid            = 1'b1;
     ga_req.operand_a        = operand_a;
@@ -307,6 +336,11 @@ module tb_ga_coprocessor;
       actual_result = ga_resp.result;
       test_passed   = (actual_result == expected_result);
 
+      $display("  Operand A: %128h", operand_a);
+      $display("  Operand B: %128h", operand_b);
+      $display("  Expected:  %128h", expected_result);
+      $display("  Actual:    %128h", actual_result);
+
       if (test_passed) begin
 
         pass_count++;
@@ -356,8 +390,8 @@ module tb_ga_coprocessor;
 
     if (!rst_n) begin
 
-      total_cycles <= 0;
-      busy_cycles <= 0;
+      total_cycles  <= 0;
+      busy_cycles   <= 0;
 
     end else if (test_active) begin
 
