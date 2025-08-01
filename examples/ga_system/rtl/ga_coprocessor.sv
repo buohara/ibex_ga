@@ -11,9 +11,9 @@ module ga_coprocessor
   import ga_pkg::*;
 #(
   parameter int unsigned GARegFileSize  = 32,
-  parameter int unsigned GADataWidth    = 32,
-  parameter ga_precision_e GAPrecision  = GA_PRECISION_FP32,
-  parameter ga_algebra_e GAAlgebra      = GA_ALGEBRA_3D
+  parameter int unsigned GADataWidth    = 512,
+  parameter ga_precision_e GAPrecision  = GA_PRECISION_FIXED,
+  parameter ga_algebra_e GAAlgebra      = GA_ALGEBRA_5D_CGA
 ) (
   input  logic           clk_i,
   input  logic           rst_ni,
@@ -45,7 +45,8 @@ module ga_coprocessor
   logic                           ga_alu_ready;
   logic                           ga_alu_error;
 
-  typedef enum logic [2:0] {
+  typedef enum logic [2:0]
+  {
     GA_IDLE,
     GA_DECODE,
     GA_READ_REGS,
@@ -57,10 +58,10 @@ module ga_coprocessor
 
   ga_state_e ga_state_q, ga_state_d;
 
-  ga_req_t                        ga_req_q;
-  logic                           ga_req_valid_q;
-  logic [31:0]                    ga_result_q;
-  ga_perf_counters_t              ga_perf_q, ga_perf_d;
+  ga_req_t            ga_req_q;
+  logic               ga_req_valid_q;
+  ga_multivector_t    ga_result_q;
+  ga_perf_counters_t  ga_perf_q, ga_perf_d;
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
 
@@ -86,7 +87,7 @@ module ga_coprocessor
       
       if (ga_state_q == GA_WRITE_BACK) begin
 
-        ga_result_q <= ga_alu_result.scalar;
+        ga_result_q <= ga_alu_result;
 
       end
 
@@ -269,23 +270,11 @@ module ga_coprocessor
 
     end else begin
 
-      ga_alu_operand_a.scalar       = ga_req_q.operand_a;
-      ga_alu_operand_a.vector_x     = '0;
-      ga_alu_operand_a.vector_y     = '0;
-      ga_alu_operand_a.vector_z     = '0;
-      ga_alu_operand_a.bivector_xy  = '0;
-      ga_alu_operand_a.bivector_xz  = '0;
-      ga_alu_operand_a.bivector_yz  = '0;
-      ga_alu_operand_a.trivector    = '0;
+      ga_alu_operand_a = '0;
+      ga_alu_operand_b = '0;
 
-      ga_alu_operand_b.scalar       = ga_req_q.operand_b;
-      ga_alu_operand_b.vector_x     = '0;
-      ga_alu_operand_b.vector_y     = '0;
-      ga_alu_operand_b.vector_z     = '0;
-      ga_alu_operand_b.bivector_xy  = '0;
-      ga_alu_operand_b.bivector_xz  = '0;
-      ga_alu_operand_b.bivector_yz  = '0;
-      ga_alu_operand_b.trivector    = '0;
+      ga_alu_operand_a = ga_req_q.operand_a;
+      ga_alu_operand_b = ga_req_q.operand_b;
 
     end
 

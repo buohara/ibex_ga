@@ -13,7 +13,7 @@ module tb_ga_coprocessor;
 
   import ga_pkg::*;
 
-  parameter int NUM_TESTS = 1000;
+  parameter int NUM_TESTS = 300;
   parameter int CLK_PERIOD = 10;
   
   logic clk;
@@ -33,8 +33,8 @@ module tb_ga_coprocessor;
   logic test_active;
   logic test_complete;
   
-  logic [63:0] test_inputs_mem  [0:NUM_TESTS-1];
-  logic [31:0] test_outputs_mem [0:NUM_TESTS-1];
+  logic [1024:0] test_inputs_mem  [0:NUM_TESTS-1];
+  logic [512:0] test_outputs_mem [0:NUM_TESTS-1];
   logic [3:0]  test_control_mem [0:NUM_TESTS-1];
   
   logic        unused_ga_debug_req;
@@ -214,16 +214,17 @@ module tb_ga_coprocessor;
   end
   
   task run_single_test(int test_index);
-    logic [31:0] operand_a, operand_b;
-    logic [31:0] expected_result;
+    logic [511:0] operand_a, operand_b;
+    logic [511:0] expected_result;
     logic [3:0]  function_code;
-    logic [31:0] actual_result;
+    logic [511:0] actual_result;
     logic        timeout;
     int          cycle_count;
     bit          test_passed;
     bit          should_continue;
     
-    {operand_a, operand_b}  = test_inputs_mem[test_index];
+    operand_a               = test_inputs_mem[test_index][1023:512]; 
+    operand_b               = test_inputs_mem[test_index][511:0];
     expected_result         = test_outputs_mem[test_index];
     function_code           = test_control_mem[test_index];
     

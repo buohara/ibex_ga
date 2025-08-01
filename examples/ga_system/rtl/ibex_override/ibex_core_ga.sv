@@ -47,14 +47,13 @@ module ibex_core_ga
   parameter int unsigned            DmHaltAddr       = 32'h1A110800,
   parameter int unsigned            DmExceptionAddr  = 32'h1A110808
 ) (
-  // All the same ports as ibex_core - just pass them through
+
   input  logic                         clk_i,
   input  logic                         rst_ni,
 
   input  logic [31:0]                  hart_id_i,
   input  logic [31:0]                  boot_addr_i,
 
-  // Instruction memory interface
   output logic                         instr_req_o,
   input  logic                         instr_gnt_i,
   input  logic                         instr_rvalid_i,
@@ -62,7 +61,6 @@ module ibex_core_ga
   input  logic [31:0]                  instr_rdata_i,
   input  logic                         instr_err_i,
 
-  // Data memory interface
   output logic                         data_req_o,
   input  logic                         data_gnt_i,
   input  logic                         data_rvalid_i,
@@ -73,7 +71,6 @@ module ibex_core_ga
   input  logic [31:0]                  data_rdata_i,
   input  logic                         data_err_i,
 
-  // Debug signals
   output logic                         dummy_instr_id_o,
   output logic                         dummy_instr_wb_o,
   output logic [4:0]                   rf_raddr_a_o,
@@ -84,7 +81,6 @@ module ibex_core_ga
   input  logic [RegFileDataWidth-1:0]  rf_rdata_a_ecc_i,
   input  logic [RegFileDataWidth-1:0]  rf_rdata_b_ecc_i,
 
-  // ICache interface
   output logic [IC_NUM_WAYS-1:0]       ic_tag_req_o,
   output logic                         ic_tag_write_o,
   output logic [IC_INDEX_W-1:0]        ic_tag_addr_o,
@@ -98,7 +94,6 @@ module ibex_core_ga
   input  logic                         ic_scr_key_valid_i,
   output logic                         ic_scr_key_req_o,
 
-  // Interrupt inputs
   input  logic                         irq_software_i,
   input  logic                         irq_timer_i,
   input  logic                         irq_external_i,
@@ -106,12 +101,10 @@ module ibex_core_ga
   input  logic                         irq_nm_i,
   output logic                         irq_pending_o,
 
-  // Debug Interface
   input  logic                         debug_req_i,
   output crash_dump_t                  crash_dump_o,
   output logic                         double_fault_seen_o,
 
-  // RISC-V Formal Interface
 `ifdef RVFI
   output logic                         rvfi_valid,
   output logic [63:0]                  rvfi_order,
@@ -150,7 +143,6 @@ module ibex_core_ga
   output logic                         rvfi_ext_irq_valid,
 `endif
 
-  // CPU Control Signals
   input  ibex_mubi_t                   fetch_enable_i,
   output logic                         alert_minor_o,
   output logic                         alert_major_internal_o,
@@ -158,8 +150,6 @@ module ibex_core_ga
   output ibex_mubi_t                   core_busy_o
 );
 
-  // For now, just instantiate the standard ibex_core
-  // In future versions, this will be replaced with GA-enhanced core
   ibex_core #(
     .PMPEnable        (PMPEnable),
     .PMPGranularity   (PMPGranularity),

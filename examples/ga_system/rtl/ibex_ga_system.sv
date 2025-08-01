@@ -31,24 +31,17 @@ module ibex_ga_system
   parameter bit          BranchPredictor  = 1'b0,
   parameter bit          DbgTriggerEn     = 1'b0,
   parameter bit          SecureIbex       = 1'b0,
-  
-  // GA-specific parameters
   parameter int unsigned GARegFileSize    = 32,
   parameter bit          GAEnable         = 1'b1
 ) (
-  // Clock and Reset
   input  logic        clk_i,
   input  logic        rst_ni,
-
-  // Instruction memory interface
   output logic        instr_req_o,
   input  logic        instr_gnt_i,
   input  logic        instr_rvalid_i,
   output logic [31:0] instr_addr_o,
   input  logic [31:0] instr_rdata_i,
   input  logic        instr_err_i,
-
-  // Data memory interface
   output logic        data_req_o,
   input  logic        data_gnt_i,
   input  logic        data_rvalid_i,
@@ -58,63 +51,39 @@ module ibex_ga_system
   output logic [31:0] data_wdata_o,
   input  logic [31:0] data_rdata_i,
   input  logic        data_err_i,
-
-  // Interrupt inputs
   input  logic        irq_software_i,
   input  logic        irq_timer_i,
   input  logic        irq_external_i,
   input  logic [14:0] irq_fast_i,
   input  logic        irq_nm_i,
-
-  // Debug Interface
   input  logic        debug_req_i,
   output crash_dump_t crash_dump_o,
-
-  // CPU Control Signals
   input  ibex_mubi_t  fetch_enable_i,
   output logic        alert_minor_o,
   output logic        alert_major_internal_o,
   output logic        alert_major_bus_o,
   output ibex_mubi_t  core_busy_o,
-
-  // GA Debug Interface
   output logic        ga_debug_req_o,
   input  logic        ga_debug_we_i,
   input  logic [4:0]  ga_debug_addr_i,
   input  logic [31:0] ga_debug_wdata_i,
   output logic [31:0] ga_debug_rdata_o,
-
-  // GA Performance Monitoring
   output ga_perf_counters_t ga_perf_o
 );
 
-  ////////////////////////
-  // Internal Signals   //
-  ////////////////////////
+  ga_req_t          ga_req;
+  ga_resp_t         ga_resp;
+  logic             ga_req_valid;
+  logic             ga_resp_ready;
+  ga_multivector_t  ga_operand_a;
+  ga_multivector_t  ga_operand_b;
+  logic [4:0]       ga_rd_addr;
+  logic [4:0]       ga_reg_a_addr;
+  logic [4:0]       ga_reg_b_addr;
+  ga_funct_e        ga_funct;
+  logic             ga_we;
+  logic             ga_use_ga_regs;
 
-  // GA Coprocessor Interface
-  ga_req_t  ga_req;
-  ga_resp_t ga_resp;
-
-  // Core signals that would normally come from modified Ibex core
-  logic        ga_req_valid;
-  logic        ga_resp_ready;
-  logic [31:0] ga_operand_a;
-  logic [31:0] ga_operand_b;
-  logic [4:0]  ga_rd_addr;
-  logic [4:0]  ga_reg_a_addr;
-  logic [4:0]  ga_reg_b_addr;
-  ga_funct_e   ga_funct;
-  logic        ga_we;
-  logic        ga_use_ga_regs;
-
-  ////////////////////////
-  // Ibex Core Instance //
-  ////////////////////////
-
-  // For now, instantiate standard Ibex core
-  // In a full implementation, this would be the modified core
-  
   ibex_core_ga #(
     .PMPEnable        (PMPEnable),
     .PMPGranularity   (PMPGranularity),
@@ -138,16 +107,12 @@ module ibex_ga_system
     .rst_ni              (rst_ni),
     .hart_id_i           (32'b0),
     .boot_addr_i         (32'h00000000),
-
-    // Instruction memory interface
     .instr_req_o         (instr_req_o),
     .instr_gnt_i         (instr_gnt_i),
     .instr_rvalid_i      (instr_rvalid_i),
     .instr_addr_o        (instr_addr_o),
     .instr_rdata_i       (instr_rdata_i),
     .instr_err_i         (instr_err_i),
-
-    // Data memory interface
     .data_req_o          (data_req_o),
     .data_gnt_i          (data_gnt_i),
     .data_rvalid_i       (data_rvalid_i),
@@ -157,8 +122,6 @@ module ibex_ga_system
     .data_wdata_o        (data_wdata_o),
     .data_rdata_i        (data_rdata_i),
     .data_err_i          (data_err_i),
-
-    // Debug signals (tie off unused ones)
     .dummy_instr_id_o    (),
     .dummy_instr_wb_o    (),
     .rf_raddr_a_o        (),
@@ -168,8 +131,6 @@ module ibex_ga_system
     .rf_wdata_wb_ecc_o   (),
     .rf_rdata_a_ecc_i    ('0),
     .rf_rdata_b_ecc_i    ('0),
-
-    // Icache signals (tie off for basic system)
     .ic_tag_req_o        (),
     .ic_tag_write_o      (),
     .ic_tag_addr_o       (),
@@ -182,16 +143,12 @@ module ibex_ga_system
     .ic_data_rdata_i     ('{default:'0}),
     .ic_scr_key_valid_i  (1'b0),
     .ic_scr_key_req_o    (),
-
-    // Interrupt inputs
     .irq_software_i      (irq_software_i),
     .irq_timer_i         (irq_timer_i),
     .irq_external_i      (irq_external_i),
     .irq_fast_i          (irq_fast_i),
     .irq_nm_i            (irq_nm_i),
     .irq_pending_o       (),
-
-    // Debug Interface
     .debug_req_i         (debug_req_i),
     .crash_dump_o        (crash_dump_o),
     .double_fault_seen_o (),
@@ -204,16 +161,12 @@ module ibex_ga_system
     .core_busy_o         (core_busy_o)
   );
 
-  ////////////////////////
-  // GA Coprocessor     //
-  ////////////////////////
-
   generate
+
     if (GAEnable) begin : gen_ga_coprocessor
       
-      // Build GA request from decoded instruction
-      // In a full implementation, this would come from the modified decoder
       always_comb begin
+
         ga_req.valid       = ga_req_valid;
         ga_req.operand_a   = ga_operand_a;
         ga_req.operand_b   = ga_operand_b;
@@ -223,13 +176,14 @@ module ibex_ga_system
         ga_req.funct       = ga_funct;
         ga_req.we          = ga_we;
         ga_req.use_ga_regs = ga_use_ga_regs;
+
       end
 
       ga_coprocessor #(
         .GARegFileSize (GARegFileSize),
         .GADataWidth   (32),
-        .GAPrecision   (GA_PRECISION_FP32),
-        .GAAlgebra     (GA_ALGEBRA_3D)
+        .GAPrecision   (GA_PRECISION_FIXED),
+        .GAAlgebra     (GA_ALGEBRA_5D_CGA)
       ) u_ga_coprocessor (
         .clk_i          (clk_i),
         .rst_ni         (rst_ni),
@@ -244,7 +198,7 @@ module ibex_ga_system
       );
 
     end else begin : gen_no_ga
-      // Tie off GA signals when disabled
+
       assign ga_resp.valid     = 1'b0;
       assign ga_resp.result    = '0;
       assign ga_resp.error     = 1'b0;
@@ -258,12 +212,6 @@ module ibex_ga_system
     end
   endgenerate
 
-  ////////////////////////
-  // Placeholder Logic  //
-  ////////////////////////
-
-  // These signals would normally come from the modified Ibex decoder/core
-  // For now, tie them off as placeholders
   assign ga_req_valid    = 1'b0;  // No GA instructions detected
   assign ga_resp_ready   = 1'b1;  // Always ready to accept results
   assign ga_operand_a    = '0;
