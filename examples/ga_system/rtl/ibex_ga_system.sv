@@ -204,16 +204,17 @@ module ibex_ga_system
       assign ga_resp.error     = 1'b0;
       assign ga_resp.busy      = 1'b0;
       assign ga_resp.overflow  = 1'b0;
-      assign ga_resp.underflow = 1'b0;
-      
+      assign ga_resp.underflow = 1'b0;    
       assign ga_debug_req_o    = 1'b0;
       assign ga_debug_rdata_o  = '0;
       assign ga_perf_o         = '0;
+
     end
+
   endgenerate
 
-  assign ga_req_valid    = 1'b0;  // No GA instructions detected
-  assign ga_resp_ready   = 1'b1;  // Always ready to accept results
+  assign ga_req_valid    = 1'b0;
+  assign ga_resp_ready   = 1'b1;
   assign ga_operand_a    = '0;
   assign ga_operand_b    = '0;
   assign ga_rd_addr      = '0;
@@ -223,15 +224,12 @@ module ibex_ga_system
   assign ga_we           = 1'b0;
   assign ga_use_ga_regs  = 1'b0;
 
-  ////////////////////////
-  // Assertions         //
-  ////////////////////////
-
   `ifdef ASSERT_ON
-    // Check that GA coprocessor responds correctly
+
     assert property (@(posedge clk_i) disable iff (!rst_ni)
       (GAEnable && ga_req.valid && ga_resp.ready |-> ##[1:10] ga_resp.valid))
       else $error("GA coprocessor failed to respond");
+
   `endif
 
 endmodule

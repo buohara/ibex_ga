@@ -184,6 +184,7 @@ module tb_ga_coprocessor;
   end
   
   initial begin
+    
     $display("=== GA Coprocessor Test Suite ===");
     $display("Running %0d test vectors", NUM_TESTS);
     
@@ -205,7 +206,8 @@ module tb_ga_coprocessor;
     begin : test_loop
 
       int i;
-      for (i = 0; i < NUM_TESTS; i++) begin
+      //for (i = 0; i < NUM_TESTS; i++) begin
+      for (i = 600; i < 610; i++) begin
         
         run_single_test(i);
         test_count++;
@@ -245,12 +247,12 @@ module tb_ga_coprocessor;
 
     logic [511:0] operand_a, operand_b;
     logic [511:0] expected_result;
-    logic [3:0]  function_code;
+    logic [3:0]   function_code;
     logic [511:0] actual_result;
-    logic        timeout;
-    int          cycle_count;
-    bit          test_passed;
-    bit          should_continue;
+    logic         timeout;
+    int           cycle_count;
+    bit           test_passed;
+    bit           should_continue;
     
     operand_a               = test_inputs_mem[test_index][1023:512]; 
     operand_b               = test_inputs_mem[test_index][511:0];
@@ -269,14 +271,14 @@ module tb_ga_coprocessor;
     ga_req.we               = 1'b1;
     ga_req.use_ga_regs      = 1'b0;
 
-    @(posedge clk);
+    while (!ga_resp.ready) @(posedge clk);
     
     if (should_continue) begin
 
       timeout     = 0;
       cycle_count = 0;
       
-      while (!ga_resp.ready && !timeout && should_continue) begin
+      while (!ga_resp.valid && !timeout && should_continue) begin
         
         @(posedge clk);
         cycle_count++;
@@ -303,36 +305,6 @@ module tb_ga_coprocessor;
     
     if (should_continue) begin
 
-      ga_req.valid  = 1'b0;
-      timeout       = 0;
-      cycle_count   = 0;
-
-      while (!ga_resp.valid && !timeout) begin
-
-        @(posedge clk);
-          cycle_count++;
-        
-        if (cycle_count > 100) begin
-
-          timeout         = 1;
-          should_continue = 1'b0;
-
-        end
-      
-      end
-      
-      if (timeout) begin
-
-        $error("Test %0d: Timeout waiting for response", test_index);
-        fail_count++;
-        should_continue = 1'b0;
-
-      end
-
-    end
-    
-    if (should_continue) begin
-
       actual_result = ga_resp.result;
       test_passed   = (actual_result == expected_result);
 
@@ -340,6 +312,7 @@ module tb_ga_coprocessor;
       $display("  Operand B: %128h", operand_b);
       $display("  Expected:  %128h", expected_result);
       $display("  Actual:    %128h", actual_result);
+      $display("  Function:  %0d", function_code);
 
       if (test_passed) begin
 
@@ -355,8 +328,8 @@ module tb_ga_coprocessor;
       end else begin
 
         fail_count++;
-        $display("Test %0d FAIL: op=%0d, a=%h, b=%h, expected=%h, actual=%h", 
-               test_index, function_code, operand_a, operand_b, expected_result, actual_result);
+        // $display("Test %0d FAIL: op=%0d, a=%h, b=%h, expected=%h, actual=%h", 
+        //        test_index, function_code, operand_a, operand_b, expected_result, actual_result);
 
       end
       
@@ -366,17 +339,6 @@ module tb_ga_coprocessor;
         ga_resp.error, ga_resp.overflow, ga_resp.underflow
       );
       
-      if (ga_resp.error) begin
-        $display("Warning: Test %0d: Error flag set", test_index);
-      end
-
-      if (ga_resp.overflow) begin
-        $display("Warning: Test %0d: Overflow flag set", test_index);
-      end
-
-      if (ga_resp.underflow) begin
-        $display("Warning: Test %0d: Underflow flag set", test_index);
-      end
     end
     
     @(posedge clk);

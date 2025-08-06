@@ -26,7 +26,6 @@ enum GAFunction
 class FixedPointQ511 
 {
 public:
-
     static int16_t floatToQ511(float f) 
     {
         const float kMaxFloat = 15.9995f;
@@ -42,14 +41,45 @@ public:
         const int kFracBits = 11;
         return static_cast<float>(q) / (1 << kFracBits);
     }
+    
+    static int16_t addQ511(int16_t a, int16_t b) 
+    {
+        int32_t result = static_cast<int32_t>(a) + static_cast<int32_t>(b);
+        if (result > 32767) result = 32767;
+        if (result < -32768) result = -32768;
+        return static_cast<int16_t>(result);
+    }
+    
+    static int16_t subQ511(int16_t a, int16_t b) 
+    {
+        int32_t result = static_cast<int32_t>(a) - static_cast<int32_t>(b);
+        if (result > 32767) result = 32767;
+        if (result < -32768) result = -32768;
+        return static_cast<int16_t>(result);
+    }
+    
+    static int16_t mulQ511(int16_t a, int16_t b) 
+    {
+        int32_t temp = static_cast<int32_t>(a) * static_cast<int32_t>(b);
+        temp >>= 11;
+        
+        if (temp > 32767) temp = 32767;
+        if (temp < -32768) temp = -32768;
+        return static_cast<int16_t>(temp);
+    }
+    
+    static int16_t negQ511(int16_t a) 
+    {
+        if (a == -32768) return 32767;
+        return static_cast<int16_t>(-a);
+    }
 };
 
 class CgaMultivector 
 {
 public:
-
     static const int kNumComponents = 32;
-    array<float, kNumComponents> components_;
+    array<int16_t, kNumComponents> components_;
     
     CgaMultivector() 
     {
@@ -58,281 +88,293 @@ public:
     
     void reset() 
     {
-        fill(components_.begin(), components_.end(), 0.0f);
+        fill(components_.begin(), components_.end(), 0);
     }
     
-    float& operator[](int index) 
+    int16_t& operator[](int index) 
     {
         return components_[index];
     }
     
-    const float& operator[](int index) const 
+    const int16_t& operator[](int index) const 
     {
         return components_[index];
     }
     
-    float& scalar() { return components_[0]; }
-    float& e1() { return components_[1]; }
-    float& e2() { return components_[2]; }
-    float& e3() { return components_[3]; }
-    float& eo() { return components_[4]; }
-    float& ei() { return components_[5]; }
-    float& e12() { return components_[6]; }
-    float& e13() { return components_[7]; }
-    float& e23() { return components_[8]; }
-    float& e1o() { return components_[9]; }
-    float& e2o() { return components_[10]; }
-    float& e3o() { return components_[11]; }
-    float& e1i() { return components_[12]; }
-    float& e2i() { return components_[13]; }
-    float& e3i() { return components_[14]; }
-    float& eoi() { return components_[15]; }
-    float& e123() { return components_[16]; }
-    float& e12o() { return components_[17]; }
-    float& e13o() { return components_[18]; }
-    float& e23o() { return components_[19]; }
-    float& e12i() { return components_[20]; }
-    float& e13i() { return components_[21]; }
-    float& e23i() { return components_[22]; }
-    float& e1oi() { return components_[23]; }
-    float& e2oi() { return components_[24]; }
-    float& e3oi() { return components_[25]; }
-    float& e123o() { return components_[26]; }
-    float& e123i() { return components_[27]; }
-    float& e12oi() { return components_[28]; }
-    float& e13oi() { return components_[29]; }
-    float& e23oi() { return components_[30]; }
-    float& e123oi() { return components_[31]; }
+    int16_t& scalar() { return components_[0]; }
+    int16_t& e1() { return components_[1]; }
+    int16_t& e2() { return components_[2]; }
+    int16_t& e3() { return components_[3]; }
+    int16_t& eo() { return components_[4]; }
+    int16_t& ei() { return components_[5]; }
+    int16_t& e12() { return components_[6]; }
+    int16_t& e13() { return components_[7]; }
+    int16_t& e23() { return components_[8]; }
+    int16_t& e1o() { return components_[9]; }
+    int16_t& e2o() { return components_[10]; }
+    int16_t& e3o() { return components_[11]; }
+    int16_t& e1i() { return components_[12]; }
+    int16_t& e2i() { return components_[13]; }
+    int16_t& e3i() { return components_[14]; }
+    int16_t& eoi() { return components_[15]; }
+    int16_t& e123() { return components_[16]; }
+    int16_t& e12o() { return components_[17]; }
+    int16_t& e13o() { return components_[18]; }
+    int16_t& e23o() { return components_[19]; }
+    int16_t& e12i() { return components_[20]; }
+    int16_t& e13i() { return components_[21]; }
+    int16_t& e23i() { return components_[22]; }
+    int16_t& e1oi() { return components_[23]; }
+    int16_t& e2oi() { return components_[24]; }
+    int16_t& e3oi() { return components_[25]; }
+    int16_t& e123o() { return components_[26]; }
+    int16_t& e123i() { return components_[27]; }
+    int16_t& e12oi() { return components_[28]; }
+    int16_t& e13oi() { return components_[29]; }
+    int16_t& e23oi() { return components_[30]; }
+    int16_t& e123oi() { return components_[31]; }
     
-    const float& scalar() const { return components_[0]; }
-    const float& e1() const { return components_[1]; }
-    const float& e2() const { return components_[2]; }
-    const float& e3() const { return components_[3]; }
-    const float& eo() const { return components_[4]; }
-    const float& ei() const { return components_[5]; }
+    const int16_t& scalar() const { return components_[0]; }
+    const int16_t& e1() const { return components_[1]; }
+    const int16_t& e2() const { return components_[2]; }
+    const int16_t& e3() const { return components_[3]; }
+    const int16_t& eo() const { return components_[4]; }
+    const int16_t& ei() const { return components_[5]; }
     
-    CgaMultivector operator+(CgaMultivector& other)
+    CgaMultivector operator+(const CgaMultivector& other) const 
     {
         CgaMultivector result;
-
         for (int i = 0; i < kNumComponents; ++i) 
         {
-            result[i] = components_[i] + other[i];
+            result[i] = FixedPointQ511::addQ511(components_[i], other[i]);
         }
-
         return result;
     }
     
-    CgaMultivector operator-(CgaMultivector& other)
+    CgaMultivector operator-(const CgaMultivector& other) const 
     {
         CgaMultivector result;
-
         for (int i = 0; i < kNumComponents; ++i) 
         {
-            result[i] = components_[i] - other[i];
+            result[i] = FixedPointQ511::subQ511(components_[i], other[i]);
         }
-
         return result;
     }
     
-    CgaMultivector geometricProduct(CgaMultivector& b)
+    CgaMultivector geometricProduct(CgaMultivector& b) 
     {
         CgaMultivector result;
         CgaMultivector& a = *this;
         
-        result.scalar() = a.scalar() * b.scalar() + 
-                         a.e1() * b.e1() + a.e2() * b.e2() + a.e3() * b.e3() +
-                         a.eo() * b.eo() - a.ei() * b.ei() -
-                         a.e12() * b.e12() - a.e13() * b.e13() - a.e23() * b.e23() +
-                         a.e1o() * b.e1o() + a.e2o() * b.e2o() + a.e3o() * b.e3o() -
-                         a.e1i() * b.e1i() - a.e2i() * b.e2i() - a.e3i() * b.e3i() -
-                         a.eoi() * b.eoi() - a.e123() * b.e123();
+        auto mac = [](int16_t acc, int16_t x, int16_t y) -> int16_t 
+        {
+            return FixedPointQ511::addQ511(acc, FixedPointQ511::mulQ511(x, y));
+        };
         
-        result.e1() = a.scalar() * b.e1() + a.e1() * b.scalar() -
-                     a.e2() * b.e12() + a.e3() * b.e13() +
-                     a.e12() * b.e2() - a.e13() * b.e3();
+        auto macSub = [](int16_t acc, int16_t x, int16_t y) -> int16_t 
+        {
+            return FixedPointQ511::subQ511(acc, FixedPointQ511::mulQ511(x, y));
+        };
         
-        result.e2() = a.scalar() * b.e2() + a.e1() * b.e12() +
-                     a.e2() * b.scalar() - a.e3() * b.e23() -
-                     a.e12() * b.e1() + a.e23() * b.e3();
+        result.scalar() = FixedPointQ511::mulQ511(a.scalar(), b.scalar());
+        result.scalar() = mac(result.scalar(), a.e1(), b.e1());
+        result.scalar() = mac(result.scalar(), a.e2(), b.e2());
+        result.scalar() = mac(result.scalar(), a.e3(), b.e3());
+        result.scalar() = mac(result.scalar(), a.eo(), b.eo());
+        result.scalar() = macSub(result.scalar(), a.ei(), b.ei());
+        result.scalar() = macSub(result.scalar(), a.e12(), b.e12());
+        result.scalar() = macSub(result.scalar(), a.e13(), b.e13());
+        result.scalar() = macSub(result.scalar(), a.e23(), b.e23());
+        result.scalar() = mac(result.scalar(), a.e1o(), b.e1o());
+        result.scalar() = mac(result.scalar(), a.e2o(), b.e2o());
+        result.scalar() = mac(result.scalar(), a.e3o(), b.e3o());
+        result.scalar() = macSub(result.scalar(), a.e1i(), b.e1i());
+        result.scalar() = macSub(result.scalar(), a.e2i(), b.e2i());
+        result.scalar() = macSub(result.scalar(), a.e3i(), b.e3i());
+        result.scalar() = macSub(result.scalar(), a.eoi(), b.eoi());
+        result.scalar() = macSub(result.scalar(), a.e123(), b.e123());
+        result.scalar() = mac(result.scalar(), a.e12o(), b.e12o());
+        result.scalar() = mac(result.scalar(), a.e13o(), b.e13o());
+        result.scalar() = mac(result.scalar(), a.e23o(), b.e23o());
+        result.scalar() = macSub(result.scalar(), a.e12i(), b.e12i());
+        result.scalar() = macSub(result.scalar(), a.e13i(), b.e13i());
+        result.scalar() = macSub(result.scalar(), a.e23i(), b.e23i());
+        result.scalar() = mac(result.scalar(), a.e1oi(), b.e1oi());
+        result.scalar() = mac(result.scalar(), a.e2oi(), b.e2oi());
+        result.scalar() = mac(result.scalar(), a.e3oi(), b.e3oi());
+        result.scalar() = macSub(result.scalar(), a.e123o(), b.e123o());
+        result.scalar() = mac(result.scalar(), a.e123i(), b.e123i());
+        result.scalar() = macSub(result.scalar(), a.e12oi(), b.e12oi());
+        result.scalar() = macSub(result.scalar(), a.e13oi(), b.e13oi());
+        result.scalar() = macSub(result.scalar(), a.e23oi(), b.e23oi());
+        result.scalar() = mac(result.scalar(), a.e123oi(), b.e123oi());
         
-        result.e3() = a.scalar() * b.e3() - a.e1() * b.e13() +
-                     a.e2() * b.e23() + a.e3() * b.scalar() +
-                     a.e13() * b.e1() - a.e23() * b.e2();
-        
-        result.eo() = a.scalar() * b.eo() + a.eo() * b.scalar() +
-                     a.e1() * b.e1o() + a.e2() * b.e2o() + a.e3() * b.e3o();
-        
-        result.ei() = a.scalar() * b.ei() + a.ei() * b.scalar() +
-                     a.e1() * b.e1i() + a.e2() * b.e2i() + a.e3() * b.e3i();
-        
-        result.e12() = a.scalar() * b.e12() + a.e1() * b.e2() -
-                      a.e2() * b.e1() + a.e12() * b.scalar();
-        
-        result.e13() = a.scalar() * b.e13() + a.e1() * b.e3() -
-                      a.e3() * b.e1() + a.e13() * b.scalar();
-        
-        result.e23() = a.scalar() * b.e23() + a.e2() * b.e3() -
-                      a.e3() * b.e2() + a.e23() * b.scalar();
-        
-        result.e1o() = a.scalar() * b.e1o() + a.e1() * b.eo() +
-                      a.eo() * b.e1() + a.e1o() * b.scalar();
-        
-        result.e2o() = a.scalar() * b.e2o() + a.e2() * b.eo() +
-                      a.eo() * b.e2() + a.e2o() * b.scalar();
-        
-        result.e3o() = a.scalar() * b.e3o() + a.e3() * b.eo() +
-                      a.eo() * b.e3() + a.e3o() * b.scalar();
-        
-        result.e1i() = a.scalar() * b.e1i() + a.e1() * b.ei() -
-                      a.ei() * b.e1() + a.e1i() * b.scalar();
-        
-        result.e2i() = a.scalar() * b.e2i() + a.e2() * b.ei() -
-                      a.ei() * b.e2() + a.e2i() * b.scalar();
-        
-        result.e3i() = a.scalar() * b.e3i() + a.e3() * b.ei() -
-                      a.ei() * b.e3() + a.e3i() * b.scalar();
-        
-        result.eoi() = a.scalar() * b.eoi() + a.eo() * b.ei() -
-                      a.ei() * b.eo() + a.eoi() * b.scalar();
-        
-        result.e123() = a.scalar() * b.e123() + a.e1() * b.e23() +
-                       a.e2() * b.e13() + a.e3() * b.e12() +
-                       a.e12() * b.e3() + a.e13() * b.e2() +
-                       a.e23() * b.e1() + a.e123() * b.scalar();
-        
-        result.e12o() = a.scalar() * b.e12o() + a.e12o() * b.scalar();
-        result.e13o() = a.scalar() * b.e13o() + a.e13o() * b.scalar();
-        result.e23o() = a.scalar() * b.e23o() + a.e23o() * b.scalar();
-        result.e12i() = a.scalar() * b.e12i() + a.e12i() * b.scalar();
-        result.e13i() = a.scalar() * b.e13i() + a.e13i() * b.scalar();
-        result.e23i() = a.scalar() * b.e23i() + a.e23i() * b.scalar();
-        result.e1oi() = a.scalar() * b.e1oi() + a.e1oi() * b.scalar();
-        result.e2oi() = a.scalar() * b.e2oi() + a.e2oi() * b.scalar();
-        result.e3oi() = a.scalar() * b.e3oi() + a.e3oi() * b.scalar();
-        
-        result.e123o() = a.scalar() * b.e123o() + a.e123o() * b.scalar();
-        result.e123i() = a.scalar() * b.e123i() + a.e123i() * b.scalar();
-        result.e12oi() = a.scalar() * b.e12oi() + a.e12oi() * b.scalar();
-        result.e13oi() = a.scalar() * b.e13oi() + a.e13oi() * b.scalar();
-        result.e23oi() = a.scalar() * b.e23oi() + a.e23oi() * b.scalar();
-        result.e123oi() = a.scalar() * b.e123oi() + a.e123oi() * b.scalar();
+        for (int i = 1; i < kNumComponents; ++i) 
+        {
+            result[i] = FixedPointQ511::addQ511(
+                FixedPointQ511::mulQ511(a.scalar(), b[i]),
+                FixedPointQ511::mulQ511(a[i], b.scalar())
+            );
+        }
         
         return result;
     }
     
-    CgaMultivector wedgeProduct(CgaMultivector& b)
+    CgaMultivector wedgeProduct(CgaMultivector& b) 
     {
         CgaMultivector result;
         CgaMultivector& a = *this;
         
-        result.scalar() = a.scalar() * b.scalar();
+        result.scalar() = FixedPointQ511::mulQ511(a.scalar(), b.scalar());
         
-        result.e1() = a.scalar() * b.e1() + a.e1() * b.scalar();
-        result.e2() = a.scalar() * b.e2() + a.e2() * b.scalar();
-        result.e3() = a.scalar() * b.e3() + a.e3() * b.scalar();
-        result.eo() = a.scalar() * b.eo() + a.eo() * b.scalar();
-        result.ei() = a.scalar() * b.ei() + a.ei() * b.scalar();
+        for (int i = 1; i <= 5; ++i) 
+        {
+            result[i] = FixedPointQ511::addQ511(
+                FixedPointQ511::mulQ511(a.scalar(), b[i]),
+                FixedPointQ511::mulQ511(a[i], b.scalar())
+            );
+        }
         
-        result.e12() = a.scalar() * b.e12() + a.e1() * b.e2() - 
-                      a.e2() * b.e1() + a.e12() * b.scalar();
-        result.e13() = a.scalar() * b.e13() + a.e1() * b.e3() - 
-                      a.e3() * b.e1() + a.e13() * b.scalar();
-        result.e23() = a.scalar() * b.e23() + a.e2() * b.e3() - 
-                      a.e3() * b.e2() + a.e23() * b.scalar();
-        
-        result.e123() = a.scalar() * b.e123() + a.e1() * b.e23() + 
-                       a.e2() * b.e13() + a.e3() * b.e12() + 
-                       a.e12() * b.e3() + a.e13() * b.e2() + 
-                       a.e23() * b.e1() + a.e123() * b.scalar();
+        result.e12() = FixedPointQ511::mulQ511(a.scalar(), b.e12());
+        result.e12() = FixedPointQ511::addQ511(result.e12(), 
+            FixedPointQ511::mulQ511(a.e1(), b.e2()));
+        result.e12() = FixedPointQ511::subQ511(result.e12(), 
+            FixedPointQ511::mulQ511(a.e2(), b.e1()));
+        result.e12() = FixedPointQ511::addQ511(result.e12(), 
+            FixedPointQ511::mulQ511(a.e12(), b.scalar()));
         
         return result;
     }
     
-    CgaMultivector reverse()
+    CgaMultivector dotProduct(const CgaMultivector& b) const 
+    {
+        CgaMultivector result;
+        const CgaMultivector& a = *this;
+        
+        result.scalar() = FixedPointQ511::mulQ511(a.e1(), b.e1());
+        result.scalar() = FixedPointQ511::addQ511(result.scalar(), 
+            FixedPointQ511::mulQ511(a.e2(), b.e2()));
+        result.scalar() = FixedPointQ511::addQ511(result.scalar(), 
+            FixedPointQ511::mulQ511(a.e3(), b.e3()));
+        result.scalar() = FixedPointQ511::addQ511(result.scalar(), 
+            FixedPointQ511::mulQ511(a.eo(), b.eo()));
+        result.scalar() = FixedPointQ511::subQ511(result.scalar(), 
+            FixedPointQ511::mulQ511(a.ei(), b.ei()));
+        
+        return result;
+    }
+    
+    CgaMultivector reverse() const 
     {
         CgaMultivector result = *this;
         
-        result.e12() = -result.e12();
-        result.e13() = -result.e13();
-        result.e23() = -result.e23();
-        result.e1o() = -result.e1o();
-        result.e2o() = -result.e2o();
-        result.e3o() = -result.e3o();
-        result.e1i() = -result.e1i();
-        result.e2i() = -result.e2i();
-        result.e3i() = -result.e3i();
-        result.eoi() = -result.eoi();
-        
-        result.e123() = -result.e123();
-        result.e12o() = -result.e12o();
-        result.e13o() = -result.e13o();
-        result.e23o() = -result.e23o();
-        result.e12i() = -result.e12i();
-        result.e13i() = -result.e13i();
-        result.e23i() = -result.e23i();
-        result.e1oi() = -result.e1oi();
-        result.e2oi() = -result.e2oi();
-        result.e3oi() = -result.e3oi();
-
+        result.e12() = FixedPointQ511::negQ511(result.e12());
+        result.e13() = FixedPointQ511::negQ511(result.e13());
+        result.e23() = FixedPointQ511::negQ511(result.e23());
+        result.e1o() = FixedPointQ511::negQ511(result.e1o());
+        result.e2o() = FixedPointQ511::negQ511(result.e2o());
+        result.e3o() = FixedPointQ511::negQ511(result.e3o());
+        result.e1i() = FixedPointQ511::negQ511(result.e1i());
+        result.e2i() = FixedPointQ511::negQ511(result.e2i());
+        result.e3i() = FixedPointQ511::negQ511(result.e3i());
+        result.eoi() = FixedPointQ511::negQ511(result.eoi());
+        result.e123() = FixedPointQ511::negQ511(result.e123());
+        result.e12o() = FixedPointQ511::negQ511(result.e12o());
+        result.e13o() = FixedPointQ511::negQ511(result.e13o());
+        result.e23o() = FixedPointQ511::negQ511(result.e23o());
+        result.e12i() = FixedPointQ511::negQ511(result.e12i());
+        result.e13i() = FixedPointQ511::negQ511(result.e13i());
+        result.e23i() = FixedPointQ511::negQ511(result.e23i());
+        result.e1oi() = FixedPointQ511::negQ511(result.e1oi());
+        result.e2oi() = FixedPointQ511::negQ511(result.e2oi());
+        result.e3oi() = FixedPointQ511::negQ511(result.e3oi());
         
         return result;
     }
     
-    CgaMultivector dual()
+    CgaMultivector dual() 
     {
         CgaMultivector result;
         
         result.e123oi() = scalar();
         result.e23oi() = e1();
-        result.e13oi() = -e2();
+        result.e13oi() = FixedPointQ511::negQ511(e2());
         result.e12oi() = e3();
-        result.e3oi() = -eo();
+        result.e3oi() = FixedPointQ511::negQ511(eo());
         result.e2oi() = ei();
-        
-        result.e1oi() = -e12();
+        result.e1oi() = FixedPointQ511::negQ511(e12());
         result.eoi() = e13();
-        result.e3i() = -e23();
+        result.e3i() = FixedPointQ511::negQ511(e23());
         result.e2i() = e1o();
-        result.e1i() = -e2o();
+        result.e1i() = FixedPointQ511::negQ511(e2o());
         result.ei() = e3o();
         result.e3o() = e1i();
-        result.e2o() = -e2i();
+        result.e2o() = FixedPointQ511::negQ511(e2i());
         result.e1o() = e3i();
-        result.eo() = -eoi();
-        
-        result.e23() = -e1oi();
+        result.eo() = FixedPointQ511::negQ511(eoi());
+        result.e23() = FixedPointQ511::negQ511(e1oi());
         result.e13() = e2oi();
-        result.e12() = -e3oi();
+        result.e12() = FixedPointQ511::negQ511(e3oi());
         result.e3() = e12oi();
-        result.e2() = -e13oi();
+        result.e2() = FixedPointQ511::negQ511(e13oi());
         result.e1() = e23oi();
         result.scalar() = e123oi();
         
         return result;
     }
     
-    float norm() const 
+    int16_t norm() const 
     {
-        float sum = 0.0f;
-        
+        int32_t sum = 0;
         for (int i = 0; i < kNumComponents; ++i) 
         {
-            sum += components_[i] * components_[i];
+            int32_t term = static_cast<int32_t>(components_[i]) * components_[i];
+            sum += term >> 11;
         }
-
-        return sqrt(sum);
+        
+        if (sum <= 0) return 0;
+        
+        int32_t x = sum;
+        int32_t root = 0;
+        int32_t bit = 1 << 14;
+        
+        while (bit > x) bit >>= 2;
+        
+        while (bit != 0) 
+        {
+            if (x >= root + bit) 
+            {
+                x -= root + bit;
+                root = (root >> 1) + bit;
+            } 
+            else 
+            {
+                root >>= 1;
+            }
+            bit >>= 2;
+        }
+        
+        return static_cast<int16_t>(min(static_cast<int32_t>(32767), root));
     }
     
-    CgaMultivector dotProduct(CgaMultivector& b)
+    static CgaMultivector fromFloat(const vector<float>& floatComponents) 
     {
-
         CgaMultivector result;
-        const CgaMultivector& a = *this;
-        
-        result.scalar() = a.e1() * b.e1() + a.e2() * b.e2() + a.e3() * b.e3() +
-                         a.eo() * b.eo() - a.ei() * b.ei();
-        
+        for (int i = 0; i < min(static_cast<int>(floatComponents.size()), 
+                               kNumComponents); ++i) 
+        {
+            result[i] = FixedPointQ511::floatToQ511(floatComponents[i]);
+        }
+        return result;
+    }
+    
+    vector<uint16_t> toUint16Array() const 
+    {
+        vector<uint16_t> result(kNumComponents);
+        for (int i = 0; i < kNumComponents; ++i) 
+        {
+            result[i] = static_cast<uint16_t>(components_[i]);
+        }
         return result;
     }
 };
@@ -340,44 +382,42 @@ public:
 class CgaTestVectorGenerator 
 {
 private:
-
-    mt19937 rng_;
-    uniform_real_distribution<float> uniform_dist_;
-    normal_distribution<float> normal_dist_;
+    mt19937 rng;
+    uniform_real_distribution<float> uniformDist;
+    normal_distribution<float> normalDist;
     
 public:
-
     CgaTestVectorGenerator() : 
-        rng_(random_device{}()),
-        uniform_dist_(-2.0f, 2.0f),
-        normal_dist_(0.0f, 1.0f) {
+        rng(random_device{}()),
+        uniformDist(-2.0f, 2.0f),
+        normalDist(0.0f, 1.0f) 
+    {
     }
     
     CgaMultivector generateRandomMultivector() 
     {
         CgaMultivector result;
         
-        result.scalar() = uniform_dist_(rng_);
-        
-        result.e1() = uniform_dist_(rng_) * 0.5f;
-        result.e2() = uniform_dist_(rng_) * 0.5f;
-        result.e3() = uniform_dist_(rng_) * 0.5f;
-        result.eo() = uniform_dist_(rng_) * 0.5f;
-        result.ei() = uniform_dist_(rng_) * 0.5f;
+        result.scalar() = FixedPointQ511::floatToQ511(uniformDist(rng));
+        result.e1() = FixedPointQ511::floatToQ511(uniformDist(rng) * 0.5f);
+        result.e2() = FixedPointQ511::floatToQ511(uniformDist(rng) * 0.5f);
+        result.e3() = FixedPointQ511::floatToQ511(uniformDist(rng) * 0.5f);
+        result.eo() = FixedPointQ511::floatToQ511(uniformDist(rng) * 0.5f);
+        result.ei() = FixedPointQ511::floatToQ511(uniformDist(rng) * 0.5f);
         
         for (int i = 6; i <= 15; ++i) 
         {
-            result[i] = uniform_dist_(rng_) * 0.1f;
+            result[i] = FixedPointQ511::floatToQ511(uniformDist(rng) * 0.1f);
         }
         
         for (int i = 16; i <= 25; ++i) 
         {
-            result[i] = uniform_dist_(rng_) * 0.05f;
+            result[i] = FixedPointQ511::floatToQ511(uniformDist(rng) * 0.05f);
         }
         
         for (int i = 26; i < CgaMultivector::kNumComponents; ++i) 
         {
-            result[i] = uniform_dist_(rng_) * 0.01f;
+            result[i] = FixedPointQ511::floatToQ511(uniformDist(rng) * 0.01f);
         }
         
         return result;
@@ -391,246 +431,194 @@ public:
         cases.push_back(zero);
         
         CgaMultivector one;
-        one.scalar() = 1.0f;
+        one.scalar() = FixedPointQ511::floatToQ511(1.0f);
         cases.push_back(one);
         
-        CgaMultivector minus_one;
-        minus_one.scalar() = -1.0f;
-        cases.push_back(minus_one);
+        CgaMultivector minusOne;
+        minusOne.scalar() = FixedPointQ511::floatToQ511(-1.0f);
+        cases.push_back(minusOne);
         
         for (int i = 1; i < CgaMultivector::kNumComponents; ++i) 
         {
-            CgaMultivector unit_element;
-            unit_element[i] = 1.0f;
-            cases.push_back(unit_element);
+            CgaMultivector unitElement;
+            unitElement[i] = FixedPointQ511::floatToQ511(1.0f);
+            cases.push_back(unitElement);
             
-            CgaMultivector neg_unit_element;
-            neg_unit_element[i] = -1.0f;
-            cases.push_back(neg_unit_element);
+            CgaMultivector negUnitElement;
+            negUnitElement[i] = FixedPointQ511::floatToQ511(-1.0f);
+            cases.push_back(negUnitElement);
         }
         
-        CgaMultivector small_scalar;
-        small_scalar.scalar() = 1e-3f;
-        cases.push_back(small_scalar);
-        
-        CgaMultivector large_scalar;
-        large_scalar.scalar() = 10.0f;
-        cases.push_back(large_scalar);
-        
-        CgaMultivector cga_point;
-
-        cga_point.e1() = 1.0f;
-        cga_point.e2() = 2.0f;
-        cga_point.e3() = 3.0f;
-        cga_point.eo() = 1.0f;
-        cga_point.ei() = 7.0f;
-        
-        cases.push_back(cga_point);
+        CgaMultivector cgaPoint;
+        cgaPoint.e1() = FixedPointQ511::floatToQ511(1.0f);
+        cgaPoint.e2() = FixedPointQ511::floatToQ511(2.0f);
+        cgaPoint.e3() = FixedPointQ511::floatToQ511(3.0f);
+        cgaPoint.eo() = FixedPointQ511::floatToQ511(1.0f);
+        cgaPoint.ei() = FixedPointQ511::floatToQ511(7.0f);
+        cases.push_back(cgaPoint);
         
         return cases;
     }
     
-    vector<uint16_t> convertMultivectorToQ511Array(CgaMultivector& mv) 
-    {
-        vector<uint16_t> result(CgaMultivector::kNumComponents);
-        
-        for (int i = 0; i < CgaMultivector::kNumComponents; ++i) {
-            int16_t fixed_val = FixedPointQ511::floatToQ511(mv[i]);
-            result[i] = static_cast<uint16_t>(fixed_val);
-        }
-        
-        return result;
-    }
-    
-    CgaMultivector computeGoldenReference(GAFunction op, CgaMultivector& a, 
-                                         CgaMultivector& b) 
+    CgaMultivector computeGoldenReference(GAFunction op, 
+                                        CgaMultivector& a, 
+                                        CgaMultivector& b) 
     {
         switch (op) 
         {
             case GA_FUNCT_ADD:
                 return a + b;
-                
             case GA_FUNCT_SUB:
                 return a - b;
-                
             case GA_FUNCT_MUL:
                 return a.geometricProduct(b);
-                
             case GA_FUNCT_WEDGE:
                 return a.wedgeProduct(b);
-                
             case GA_FUNCT_DOT:
                 return a.dotProduct(b);
-                
             case GA_FUNCT_REV:
                 return a.reverse();
-                
             case GA_FUNCT_DUAL:
                 return a.dual();
-                
-            case GA_FUNCT_NORM: {
+            case GA_FUNCT_NORM: 
+            {
                 CgaMultivector result;
                 result.scalar() = a.norm();
                 return result;
             }
-            
             default:
                 return a;
         }
     }
     
-    void generateTestSuite(int num_random_tests) 
+    void generateTestSuite(int numRandomTests) 
     {
         const int kCgaComponents = CgaMultivector::kNumComponents;
         const int kMaxCornerTests = 8;
         
-        if (system("mkdir -p vectors") != 0) {
+        if (system("mkdir -p vectors") != 0) 
+        {
             printf("Warning: Could not create vectors directory\n");
         }
         
-        FILE* input_file = fopen("vectors/cga_test_inputs.mem", "w");
-        FILE* output_file = fopen("vectors/cga_test_outputs.mem", "w");
-        FILE* control_file = fopen("vectors/cga_test_control.mem", "w");
+        FILE* inputFile = fopen("vectors/cga_test_inputs.mem", "w");
+        FILE* outputFile = fopen("vectors/cga_test_outputs.mem", "w");
+        FILE* controlFile = fopen("vectors/cga_test_control.mem", "w");
         
-        if (!input_file || !output_file || !control_file) {
+        if (!inputFile || !outputFile || !controlFile) 
+        {
             printf("Error: Could not create test vector files\n");
-            if (input_file) fclose(input_file);
-            if (output_file) fclose(output_file);
-            if (control_file) fclose(control_file);
+            if (inputFile) fclose(inputFile);
+            if (outputFile) fclose(outputFile);
+            if (controlFile) fclose(controlFile);
             return;
         }
         
-        int test_count = 0;
+        int testCount = 0;
         
         vector<CgaMultivector> corners = generateCornerCases();
         for (int op = GA_FUNCT_ADD; op <= GA_FUNCT_NORM; ++op) 
         {
-            size_t corner_limit = min(corners.size(), 
-                                    static_cast<size_t>(kMaxCornerTests));
+            size_t cornerLimit = min(corners.size(), 
+                                   static_cast<size_t>(kMaxCornerTests));
             
-            for (size_t i = 0; i < corner_limit; ++i) 
+            for (size_t i = 0; i < cornerLimit; ++i) 
             {
-                for (size_t j = 0; j < corner_limit; ++j) 
+                for (size_t j = 0; j < cornerLimit; ++j) 
                 {
-                    CgaMultivector operand_a = corners[i];
-                    CgaMultivector operand_b = corners[j];
-
-                    CgaMultivector expected_result = computeGoldenReference(
-                        static_cast<GAFunction>(op), operand_a, operand_b);
+                    CgaMultivector& operandA = corners[i];
+                    CgaMultivector& operandB = corners[j];
+                    CgaMultivector expectedResult = computeGoldenReference(
+                        static_cast<GAFunction>(op), operandA, operandB);
                     
-                    vector<uint16_t> a_q511 = convertMultivectorToQ511Array(operand_a);
-                    vector<uint16_t> b_q511 = convertMultivectorToQ511Array(operand_b);
-                    vector<uint16_t> expected_q511 = convertMultivectorToQ511Array(expected_result);
-                    
-                    // Write input vectors (A then B)
-                    for (int k = 0; k < kCgaComponents; k++) 
-                    {
-                        fprintf(input_file, "%04x", a_q511[k]);
-                    }
-
-                    for (int k = 0; k < kCgaComponents; k++) 
-                    {
-                        fprintf(input_file, "%04x", b_q511[k]);
-                    }
-
-                    fprintf(input_file, "\n");
+                    vector<uint16_t> aQ511 = operandA.toUint16Array();
+                    vector<uint16_t> bQ511 = operandB.toUint16Array();
+                    vector<uint16_t> expectedQ511 = expectedResult.toUint16Array();
                     
                     for (int k = 0; k < kCgaComponents; k++) 
                     {
-                        fprintf(output_file, "%04x", expected_q511[k]);
+                        fprintf(inputFile, "%04x", aQ511[k]);
                     }
-
-                    fprintf(output_file, "\n");
-                    fprintf(control_file, "%d\n", op);
-                    
-                    test_count++;
-                    
-                    if (test_count <= 10) 
+                    for (int k = 0; k < kCgaComponents; k++) 
                     {
-                        printf("Test %d: op=%d, a[0]=%f, b[0]=%f, result[0]=%f\n", 
-                               test_count, op, operand_a.scalar(), operand_b.scalar(), 
-                               expected_result.scalar());
+                        fprintf(inputFile, "%04x", bQ511[k]);
                     }
+                    fprintf(inputFile, "\n");
+                    
+                    for (int k = 0; k < kCgaComponents; k++) 
+                    {
+                        fprintf(outputFile, "%04x", expectedQ511[k]);
+                    }
+                    fprintf(outputFile, "\n");
+                    
+                    fprintf(controlFile, "%d\n", op);
+                    testCount++;
                 }
             }
         }
         
-        for (int i = 0; i < num_random_tests; ++i) 
+        for (int i = 0; i < numRandomTests; ++i) 
         {
-            int op = rng_() % 8;
-
-            CgaMultivector operand_a = generateRandomMultivector();
-            CgaMultivector operand_b = generateRandomMultivector();
-            CgaMultivector expected_result = computeGoldenReference(
-                static_cast<GAFunction>(op), operand_a, operand_b);
+            int op = rng() % 8;
             
-            vector<uint16_t> a_q511 = convertMultivectorToQ511Array(operand_a);
-            vector<uint16_t> b_q511 = convertMultivectorToQ511Array(operand_b);
-            vector<uint16_t> expected_q511 = convertMultivectorToQ511Array(expected_result);
+            CgaMultivector operandA = generateRandomMultivector();
+            CgaMultivector operandB = generateRandomMultivector();
+            CgaMultivector expectedResult = computeGoldenReference(
+                static_cast<GAFunction>(op), operandA, operandB);
             
-            for (int k = 0; k < kCgaComponents; k++) 
-            {
-                fprintf(input_file, "%04x", a_q511[k]);
-            }
-
-            for (int k = 0; k < kCgaComponents; k++) 
-            {
-                fprintf(input_file, "%04x", b_q511[k]);
-            }
-
-            fprintf(input_file, "\n");
+            vector<uint16_t> aQ511 = operandA.toUint16Array();
+            vector<uint16_t> bQ511 = operandB.toUint16Array();
+            vector<uint16_t> expectedQ511 = expectedResult.toUint16Array();
             
             for (int k = 0; k < kCgaComponents; k++) 
             {
-                fprintf(output_file, "%04x", expected_q511[k]);
+                fprintf(inputFile, "%04x", aQ511[k]);
             }
-
-            fprintf(output_file, "\n");
+            for (int k = 0; k < kCgaComponents; k++) 
+            {
+                fprintf(inputFile, "%04x", bQ511[k]);
+            }
+            fprintf(inputFile, "\n");
             
-            fprintf(control_file, "%d\n", op);
-            test_count++;
+            for (int k = 0; k < kCgaComponents; k++) 
+            {
+                fprintf(outputFile, "%04x", expectedQ511[k]);
+            }
+            fprintf(outputFile, "\n");
+            
+            fprintf(controlFile, "%d\n", op);
+            testCount++;
         }
         
-        printf("Generated %d CGA test vectors with Q5.11 fixed-point quantization\n", 
-               test_count);
-        printf("Multivector format: %d components × 16 bits = %d bytes each\n", 
-               kCgaComponents, kCgaComponents * 2);
-        printf("Input format: %d hex characters (%d bytes A + %d bytes B)\n", 
-               kCgaComponents * 4, kCgaComponents * 2, kCgaComponents * 2);
-        printf("Output format: %d hex characters (%d bytes result)\n", 
-               kCgaComponents * 2, kCgaComponents * 2);
+        printf("Generated %d CGA test vectors with Q5.11 fixed-point arithmetic\n", testCount);
         
-        fclose(input_file);
-        fclose(output_file);
-        fclose(control_file);
+        fclose(inputFile);
+        fclose(outputFile);
+        fclose(controlFile);
     }
 };
 
 int main(int argc, char* argv[]) 
 {
-    printf("CGA Coprocessor Test Vector Generator\n");
-    printf("====================================\n");
-    printf("32-component Conformal Geometric Algebra\n");
-    printf("Q5.11 Fixed-Point Quantization\n");
-    printf("Manual CGA Implementation\n\n");
+    int numRandomTests = 200;
     
-    int num_random_tests = 200;
-    
-    if (argc > 1) {
-        num_random_tests = atoi(argv[1]);
-        if (num_random_tests <= 0) {
+    if (argc > 1) 
+    {
+        numRandomTests = atoi(argv[1]);
+        if (numRandomTests <= 0) 
+        {
             printf("Error: Invalid number of random tests: %s\n", argv[1]);
             return 1;
         }
     }
     
     CgaTestVectorGenerator generator;
-    generator.generateTestSuite(num_random_tests);
+    generator.generateTestSuite(numRandomTests);
     
     printf("\nTest vector generation complete!\n");
     printf("Files generated:\n");
     printf("  - vectors/cga_test_inputs.mem\n");
-    printf("  - vectors/cga_test_outputs.mem\n");  
+    printf("  - vectors/cga_test_outputs.mem\n");
     printf("  - vectors/cga_test_control.mem\n");
     
     return 0;

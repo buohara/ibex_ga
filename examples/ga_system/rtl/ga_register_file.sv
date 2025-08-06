@@ -11,34 +11,23 @@
 
 module ga_register_file #(
   parameter int unsigned NumRegs   = 32,
-  parameter int unsigned DataWidth = 256  // Size of ga_multivector_t
+  parameter int unsigned DataWidth = 256
 ) (
   input  logic                      clk_i,
   input  logic                      rst_ni,
 
-  // Write port
   input  logic                      we_i,
   input  logic [$clog2(NumRegs)-1:0] waddr_i,
   input  logic [DataWidth-1:0]      wdata_i,
 
-  // Read port A
   input  logic [$clog2(NumRegs)-1:0] raddr_a_i,
   output logic [DataWidth-1:0]      rdata_a_o,
 
-  // Read port B
   input  logic [$clog2(NumRegs)-1:0] raddr_b_i,
   output logic [DataWidth-1:0]      rdata_b_o
 );
 
-  ////////////////////////
-  // Register Array     //
-  ////////////////////////
-
   logic [DataWidth-1:0] registers [NumRegs];
-
-  ////////////////////////
-  // Write Logic        //
-  ////////////////////////
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin
@@ -53,11 +42,6 @@ module ga_register_file #(
     end
   end
 
-  ////////////////////////
-  // Read Logic         //
-  ////////////////////////
-
-  // Combinational read - zero if address is 0 (like RISC-V x0 register)
   always_comb begin
     if (raddr_a_i == '0) begin
       rdata_a_o = '0;
@@ -74,17 +58,12 @@ module ga_register_file #(
     end
   end
 
-  ////////////////////////
-  // Assertions         //
-  ////////////////////////
-
   `ifdef ASSERT_ON
-    // Check write address bounds
+
     assert property (@(posedge clk_i) disable iff (!rst_ni)
       (we_i |-> waddr_i < NumRegs))
       else $error("Write address out of bounds");
 
-    // Check read address bounds
     assert property (@(posedge clk_i) disable iff (!rst_ni)
       (raddr_a_i < NumRegs))
       else $error("Read address A out of bounds");

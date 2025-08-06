@@ -56,11 +56,6 @@ run-simple-system: sw-simple-hello | $(Vibex_simple_system)
 	build/lowrisc_ibex_ibex_simple_system_0/sim-verilator/Vibex_simple_system \
 		--raminit=$(simple-system-program)
 
-
-# GA System
-# Use the following targets:
-# - "build-ga-system"
-# - "run-ga-system"
 .PHONY: build-ga-system
 build-ga-system:
 	@echo "Building GA system with Conformal Geometric Algebra support..."
@@ -75,11 +70,11 @@ build-ga-system:
 	@echo "GA system build complete!"
 	@echo "Main GA system ready for simulation"
 
-.PHONY: simulate-ga-system
-simulate-ga-system: build-ga-system
-	@echo "Running GA coprocessor unit tests with Verilator..."
+.PHONY: simulate-ga-alu
+simulate-ga-alu: build-ga-system
+	@echo "Running GA ALU  unit tests with Verilator..."
 	cd examples/ga_system/tests && $(MAKE) simulate WAVES=1
-	@echo "GA coprocessor simulation complete!"
+	@echo "GA ALU simulation complete!"
 	@echo "Check examples/ga_system/tests/ga_test_verbose.log for detailed results"
 
 # Arty A7 FPGA example

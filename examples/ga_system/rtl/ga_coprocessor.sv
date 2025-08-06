@@ -33,6 +33,7 @@ module ga_coprocessor
   logic [GA_REG_ADDR_WIDTH-1:0]   ga_rf_waddr;
   logic [GA_REG_ADDR_WIDTH-1:0]   ga_rf_raddr_a;
   logic [GA_REG_ADDR_WIDTH-1:0]   ga_rf_raddr_b;
+
   ga_multivector_t                ga_rf_wdata;
   ga_multivector_t                ga_rf_rdata_a;
   ga_multivector_t                ga_rf_rdata_b;
@@ -43,6 +44,7 @@ module ga_coprocessor
   ga_funct_e                      ga_alu_op;
   logic                           ga_alu_valid;
   logic                           ga_alu_ready;
+  logic                           ga_alu_valid_o;
   logic                           ga_alu_error;
 
   typedef enum logic [2:0]
@@ -116,8 +118,8 @@ module ga_coprocessor
         
         if (ga_req_i.valid) begin
 
-          ga_state_d = GA_DECODE;
-          ga_perf_d.ga_ops_total = ga_perf_q.ga_ops_total + 1;
+          ga_state_d              = GA_DECODE;
+          ga_perf_d.ga_ops_total  = ga_perf_q.ga_ops_total + 1;
 
         end
 
@@ -180,6 +182,7 @@ module ga_coprocessor
             ga_state_d  = GA_WRITE_BACK;
 
           end
+
         end
         
         ga_perf_d.ga_cycles_busy = ga_perf_q.ga_cycles_busy + 1;
@@ -188,15 +191,19 @@ module ga_coprocessor
 
       GA_WRITE_BACK: begin
 
-        ga_resp_o.valid  = 1'b1;
-        ga_resp_o.result = ga_result_q;
-        ga_resp_o.busy   = 1'b0;
+        if (ga_alu_valid_o) begin
 
-        if (ga_req_q.we) begin
-          ga_rf_we = 1'b1;
+          ga_resp_o.valid  = 1'b1;
+          ga_resp_o.result = ga_alu_result;
+          ga_resp_o.busy   = 1'b0;
+
+          if (ga_req_q.we) begin
+            ga_rf_we = 1'b1;
+          end
+          
+          ga_state_d = GA_HOLD_VALID;
+
         end
-        
-        ga_state_d = GA_HOLD_VALID;
 
       end
 
@@ -279,6 +286,7 @@ module ga_coprocessor
     .operation_i    (ga_alu_op),
     .valid_i        (ga_alu_valid),
     .ready_o        (ga_alu_ready),
+    .valid_o        (ga_alu_valid_o),
     .result_o       (ga_alu_result),
     .error_o        (ga_alu_error)
   );
