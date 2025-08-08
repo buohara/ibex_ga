@@ -307,6 +307,7 @@ module tb_ga_coprocessor;
 
       actual_result = ga_resp.result;
       test_passed   = (actual_result == expected_result);
+      ga_req.valid  = 1'b0;
 
       $display("  Operand A: %128h", operand_a);
       $display("  Operand B: %128h", operand_b);

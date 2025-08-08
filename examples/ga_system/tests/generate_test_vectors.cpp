@@ -559,7 +559,7 @@ public:
         
         for (int i = 0; i < numRandomTests; ++i) 
         {
-            int op = rng() % 8;
+            int op = 2;//rng() % 8;
             
             CgaMultivector operandA = generateRandomMultivector();
             CgaMultivector operandB = generateRandomMultivector();

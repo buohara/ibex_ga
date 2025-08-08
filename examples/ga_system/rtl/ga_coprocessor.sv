@@ -1,11 +1,3 @@
-/**
- * Geometric Algebra Coprocessor
- * 
- * This module implements a geometric algebra coprocessor that can perform
- * various GA operations including geometric product, outer product, 
- * inner product, and other GA-specific operations.
- */
-
 module ga_coprocessor 
   import ibex_pkg::*;
   import ga_pkg::*;
@@ -201,17 +193,11 @@ module ga_coprocessor
             ga_rf_we = 1'b1;
           end
           
-          ga_state_d = GA_HOLD_VALID;
+          if (!ga_req_i.valid) begin
+            ga_state_d = GA_IDLE;
+          end
 
         end
-
-      end
-
-      GA_HOLD_VALID: begin
-
-        ga_resp_o.valid = 1'b1;
-        ga_resp_o.ready = 1'b0;
-        ga_state_d      = GA_IDLE;
 
       end
 
