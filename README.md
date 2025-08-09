@@ -22,7 +22,7 @@ make build-ga-system
 # Build and run unit tests on GA ALU only
 make simulate-ga-alu
 
-# Example GA system available at:
+# GA system source:
 # examples/ga_system/
 ```
 
