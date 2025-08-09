@@ -18,17 +18,15 @@ This branch includes an experimental **Conformal Geometric Algebra (CGA) ALU cop
 Ibex + GA Core are implemented under **examples/ga_system** with ga-specific RTL and overrides of **ibex_decoder.sv**, **ibex_pkg.sv**, etc for GA-specific signals and op code integration with Ibex. This folder also constains test vector generation for randomized and corner case GA op unit tests and GA coprocessor-only testbench. Simulation is done with Verilator.
 
 ```bash
-# Build the complete GA system (Versor + test vectors + Ibex+GA Core)
+# Build the complete Ibex + GACoproc system
 make build-ga-system
 
-# Build and run ga_coproc-only test vector simulation (randomized and corner case unit tests for ADD, SUB, MUL, WEDGE, DOT, REV, DUAL NORM)
-make simulate-ga-system
+# Build and run unit tests on GA ALU only
+make simulate-ga-alu
 
 # Example GA system available at:
 # examples/ga_system/
 ```
-
-The GA coprocessor extends Ibex with hardware-accelerated geometric algebra operations, making it suitable for applications requiring efficient 3D transformations, collision detection, and geometric reasoning.
 
 # Ibex RISC-V Core
 
