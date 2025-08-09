@@ -1,4 +1,6 @@
-> **⚠Project Status: Active Development** | **Latest Update: 07/29/2025**
+> **⚠Project Status: Active Development** | **Latest Update: 08/08/2025**
+
+Summary: GA ALU verilog unit test validation ongoing. ALU ops include add, sub, mul, wedge, dot, dual, rev, and norm. Test vectors are generated in a separete C++ program with fixed point Q511 components. Recent changes fix timing issues between tb/coproc/alu valid/ready sync. These make all add/sub/dual/rev/norm tests pass. Debug of mul/wedge/dot ongoing.
 
 | Component | Status | Progress |
 |-----------|--------|----------|
