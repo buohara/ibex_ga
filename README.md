@@ -1,3 +1,33 @@
+> **⚠Project Status: Active Development** | **Latest Update: 08/08/2025**
+
+Summary: GA ALU verilog unit test validation ongoing. ALU ops include add, sub, mul, wedge, dot, dual, rev, and norm. Test vectors are generated in a separete C++ program with fixed point Q511 components. Recent changes fix unit test failures related to timing issues between tb/coproc/alu valid/ready signals. These make all add/sub/dual/rev/norm tests pass. Debug of mul/wedge/dot ongoing.
+
+| Component | Status | Progress |
+|-----------|--------|----------|
+| **GA Coprocessor RTL Implementation** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
+| **GA Coprocessor Testbench Implementation** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
+| **GA Coprocessor Testbench Validation** | 🔄 In Progress | ![50%](https://progress-bar.dev/50) |
+| **Ibex + GA Core Integration** | 🔄 In Progress | ![40%](https://progress-bar.dev/40) |
+
+# Geometric Algebra Coprocessor
+
+Development in branch feature/ga_coproc.
+
+This branch includes an experimental **Conformal Geometric Algebra (CGA) ALU coprocessor** in Verilog integrated with the Ibex RISC-V core along with extended instruction set. The GA coprocessor accelerates geometric computations typically performed with matrix/vector arithmetic (in 3D, 4D spacetime, 5D conformal geometry) with single-cycle ops that generalize complex, quaternion, and octonion arithmetic. Applications include 6-DOF robotics, computer graphics transformations, and multiphysics CAD simulation acceleration.
+
+## Quick Start
+
+```bash
+# Build the complete Ibex + GACoproc system
+make build-ga-system
+
+# Build and run unit tests on GA ALU only
+make simulate-ga-alu
+
+# GA system source:
+# examples/ga_system/
+```
+
 [Ibex OpenTitan configuration Nightly Regression](https://ibex.reports.lowrisc.org/opentitan/latest/report.html)
 <a href="https://ibex.reports.lowrisc.org/opentitan/latest/report.html">
   <img src="https://ibex.reports.lowrisc.org/opentitan/latest/summary.svg">
