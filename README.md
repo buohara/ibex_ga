@@ -11,13 +11,7 @@ Summary: GA ALU verilog unit test validation ongoing. ALU ops include add, sub, 
 
 # Geometric Algebra Coprocessor
 
-This branch includes an experimental **Conformal Geometric Algebra (CGA) coprocessor** integrated with the Ibex RISC-V core. The GA coprocessor accelerates geometric computations commonly used in 6-DOF robotics, computer graphics, and physics simulation acceleration applications.
-
-## Features
-
-- **Conformal Geometric Algebra**: 5D algebra embedding 3D space for unified rotation/translation operations
-- **Custom GA Instructions**: Extended RISC-V ISA with dedicated GA opcodes (ADD, SUB, MUL, WEDGE, DOT, REV, DUAL, NORM)
-- **Hardware Acceleration**: Optimized multivector operations in dedicated coprocessor hardware
+This branch includes an experimental **Conformal Geometric Algebra (CGA) coprocessor** integrated with the Ibex RISC-V core. The GA coprocessor accelerates geometric computations commonly performed with matrix/vector arithmetic with single-cycle custom ops that provide useful generalizations of complex, quaternion, and octonion arithmetic. Applications include 6-DOF robotics, computer graphics transformations, and multiphysics simulation acceleration.
 
 ## Quick Start
 
