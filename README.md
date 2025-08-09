@@ -15,8 +15,6 @@ This branch includes an experimental **Conformal Geometric Algebra (CGA) ALU cop
 
 ## Quick Start
 
-Ibex + GA Core are implemented under **examples/ga_system** with ga-specific RTL and overrides of **ibex_decoder.sv**, **ibex_pkg.sv**, etc for GA-specific signals and op code integration with Ibex. This folder also constains test vector generation for randomized and corner case GA op unit tests and GA coprocessor-only testbench. Simulation is done with Verilator.
-
 ```bash
 # Build the complete Ibex + GACoproc system
 make build-ga-system
