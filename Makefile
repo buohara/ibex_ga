@@ -18,7 +18,9 @@ build-all: build-riscv-compliance build-simple-system build-arty-100 \
 clean:
 	rm -rf build/
 	rm -rf .fusesoc_cache/
-
+	rm -rf examples/ga_system/tests/obj_dir/
+	rm -rf examples/ga_system/tests/*.log
+	rm -rf examples/ga_system/tests/vectors/
 
 # RISC-V compliance
 .PHONY: build-riscv-compliance

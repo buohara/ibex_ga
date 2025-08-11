@@ -33,13 +33,13 @@ module tb_ga_coprocessor;
   logic test_active;
   logic test_complete;
   
-  logic [1024:0] test_inputs_mem  [0:NUM_TESTS-1];
-  logic [511:0] test_outputs_mem [0:NUM_TESTS-1];
-  logic [3:0]  test_control_mem [0:NUM_TESTS-1];
+  logic [1024:0]  test_inputs_mem  [0:NUM_TESTS-1];
+  logic [511:0]   test_outputs_mem [0:NUM_TESTS-1];
+  logic [3:0]     test_control_mem [0:NUM_TESTS-1];
   
-  logic        unused_ga_debug_req;
-  logic [31:0] unused_ga_debug_rdata;
-  logic [191:0] unused_ga_perf;
+  logic           unused_ga_debug_req;
+  logic [31:0]    unused_ga_debug_rdata;
+  logic [191:0]   unused_ga_perf;
 
   ga_coprocessor dut (
     .clk_i              (clk),
@@ -130,30 +130,30 @@ module tb_ga_coprocessor;
     
     function void write_operation_summary();
 
-      $fwrite(log_file, "\n\n=== Results by Operation ===\n");
-      $fwrite(log_file, "Operation | Total | Passed | Failed | Pass Rate\n");
-      $fwrite(log_file, "----------|-------|--------|--------|----------\n");
+      $display("\n\n=== Results by Operation ===\n");
+      $display("Operation | Total | Passed | Failed | Pass Rate\n");
+      $display("----------|-------|--------|--------|----------\n");
       
       for (int i = 0; i < 12; i++) begin
 
         if (op_counts[i] > 0) begin
 
           real pass_rate = (real'(op_passes[i]) / real'(op_counts[i])) * 100.0;
-          $fwrite(log_file, "%8s  | %5d | %6d | %6d | %7.2f%%\n",
+          $display("%8s  | %5d | %6d | %6d | %7.2f%%\n",
                   operation_names[i], op_counts[i], op_passes[i], op_fails[i], pass_rate);
 
         end
 
       end
       
-      $fwrite(log_file, "\n=== Failed Tests by Operation ===\n");
+      $display("\n=== Failed Tests by Operation ===\n");
 
       for (int op = 0; op < 12; op++) begin
 
         if (op_fails[op] > 0) begin
 
-          $fwrite(log_file, "\n%s Failures (%d total):\n", operation_names[op], op_fails[op]);
-          $fwrite(log_file, "Use 'grep \"| %s |.*FAIL\"' to find all %s failures\n", 
+          $display("\n%s Failures (%d total):\n", operation_names[op], op_fails[op]);
+          $display("Use 'grep \"| %s |.*FAIL\"' to find all %s failures\n", 
                   operation_names[op], operation_names[op]);
 
         end
@@ -206,8 +206,8 @@ module tb_ga_coprocessor;
     begin : test_loop
 
       int i;
-      //for (i = 0; i < NUM_TESTS; i++) begin
-      for (i = 600; i < 610; i++) begin
+      for (i = 0; i < NUM_TESTS; i++) begin
+      //for (i = 600; i < 610; i++) begin
         
         run_single_test(i);
         test_count++;
@@ -309,11 +309,12 @@ module tb_ga_coprocessor;
       test_passed   = (actual_result == expected_result);
       ga_req.valid  = 1'b0;
 
-      $display("  Operand A: %128h", operand_a);
-      $display("  Operand B: %128h", operand_b);
-      $display("  Expected:  %128h", expected_result);
-      $display("  Actual:    %128h", actual_result);
-      $display("  Function:  %0d", function_code);
+      if (function_code == GA_FUNCT_MUL) begin
+
+        $display("ga_alu geometric product: a=%128h, b=%128h, exp=%128h, res=%128h", 
+                 operand_a, operand_b, expected_result, actual_result);
+
+      end
 
       if (test_passed) begin
 
@@ -373,7 +374,7 @@ module tb_ga_coprocessor;
   always @(posedge test_complete) begin
 
     $display("\n=== Performance Metrics ===");
-    $display("Total cycles:     %0d", total_cycles);
+    $display("Total Cycles:     %0d", total_cycles);
     $display("Busy cycles:      %0d", busy_cycles);
     $display("Utilization:      %.2f%%", (real'(busy_cycles) / real'(total_cycles)) * 100.0);
     $display("Avg cycles/test:  %.2f", real'(total_cycles) / real'(test_count));
