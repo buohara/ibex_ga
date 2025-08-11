@@ -309,9 +309,23 @@ module tb_ga_coprocessor;
       test_passed   = (actual_result == expected_result);
       ga_req.valid  = 1'b0;
 
-      if (function_code == GA_FUNCT_MUL) begin
+      if (function_code == GA_FUNCT_NORM) begin
 
-        $display("ga_alu geometric product: a=%128h, b=%128h, exp=%128h, res=%128h", 
+        $display("ga_alu norm: a=%128h, b=%128h, exp=%128h, res=%128h", 
+                 operand_a, operand_b, expected_result, actual_result);
+
+      end
+
+      if (function_code == GA_FUNCT_REV) begin
+
+        $display("ga_alu rev: a=%128h, b=%128h, exp=%128h, res=%128h", 
+                 operand_a, operand_b, expected_result, actual_result);
+
+      end
+
+      if (function_code == GA_FUNCT_DUAL) begin
+
+        $display("ga_alu dual: a=%128h, b=%128h, exp=%128h, res=%128h", 
                  operand_a, operand_b, expected_result, actual_result);
 
       end
@@ -320,18 +334,9 @@ module tb_ga_coprocessor;
 
         pass_count++;
 
-        if (test_index < 10) begin
-
-          $display("Test %0d PASS: op=%0d, a=%h, b=%h, expected=%h, actual=%h", 
-                   test_index, function_code, operand_a, operand_b, expected_result, actual_result);
-
-        end
-
       end else begin
 
         fail_count++;
-        // $display("Test %0d FAIL: op=%0d, a=%h, b=%h, expected=%h, actual=%h", 
-        //        test_index, function_code, operand_a, operand_b, expected_result, actual_result);
 
       end
       

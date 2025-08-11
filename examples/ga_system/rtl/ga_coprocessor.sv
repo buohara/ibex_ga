@@ -143,6 +143,12 @@ module ga_coprocessor
 
           end
 
+          GA_FUNCT_DUAL, GA_FUNCT_REV, GA_FUNCT_NORM: begin
+
+            ga_state_d = GA_EXECUTE;
+            
+          end
+
           default: begin
 
             ga_state_d = GA_ERROR;
