@@ -1,13 +1,14 @@
-> **⚠Project Status: Active Development** | **Latest Update: 08/08/2025**
+> **⚠Project Status: Active Development** | **Latest Update: 08/11/2025**
 
-Summary: GA ALU verilog unit test validation ongoing. ALU ops include add, sub, mul, wedge, dot, dual, rev, and norm. Test vectors are generated in a separete C++ program with fixed point Q511 components. Recent changes fix unit test failures related to timing issues between tb/coproc/alu valid/ready signals. These make all add/sub/dual/rev/norm tests pass. Debug of mul/wedge/dot ongoing.
+Summary: GA ALU arithmetic unit tests now passing. On to synthesis.
 
 | Component | Status | Progress |
 |-----------|--------|----------|
-| **GA Coprocessor RTL Implementation** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
-| **GA Coprocessor Testbench Implementation** | ✅ Complete | ![100%](https://progress-bar.dev/100) |
-| **GA Coprocessor Testbench Validation** | 🔄 In Progress | ![50%](https://progress-bar.dev/50) |
-| **Ibex + GA Core Integration** | 🔄 In Progress | ![40%](https://progress-bar.dev/40) |
+| **GA Coprocessor RTL Implementation** | Complete | ![100%] (https://progress-bar.dev/100) |
+| **GA Coprocessor Testbench Implementation** | Complete | ![100%] (https://progress-bar.dev/100) |
+| **GA ALU Testbench Validation** | Complete| ![100%] (https://progress-bar.dev/50) |
+| **GA ALU Synthesis** | In Progress| ![0%] (https://progress-bar.dev/50) |
+| **Ibex + GA Core Integration** | 🔄 In Progress | ![40%] (https://progress-bar.dev/40) |
 
 # Geometric Algebra Coprocessor
 
