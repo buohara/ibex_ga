@@ -1,4 +1,6 @@
-> **⚠Project Status: Active Development** | **Latest Update: 07/29/2025**
+> **⚠Project Status: Active Development** | **Latest Update: 08/08/2025**
+
+Summary: GA ALU verilog unit test validation ongoing. ALU ops include add, sub, mul, wedge, dot, dual, rev, and norm. Test vectors are generated in a separete C++ program with fixed point Q511 components. Recent changes fix unit test failures related to timing issues between tb/coproc/alu valid/ready signals. These make all add/sub/dual/rev/norm tests pass. Debug of mul/wedge/dot ongoing.
 
 | Component | Status | Progress |
 |-----------|--------|----------|
@@ -9,30 +11,20 @@
 
 # Geometric Algebra Coprocessor
 
-This branch includes an experimental **Conformal Geometric Algebra (CGA) coprocessor** integrated with the Ibex RISC-V core. The GA coprocessor accelerates geometric computations commonly used in 6-DOF robotics, computer graphics, and physics simulation acceleration applications.
-
-## Features
-
-- **Conformal Geometric Algebra**: 5D algebra embedding 3D space for unified rotation/translation operations
-- **Custom GA Instructions**: Extended RISC-V ISA with dedicated GA opcodes (ADD, SUB, MUL, WEDGE, DOT, REV, DUAL, NORM)
-- **Hardware Acceleration**: Optimized multivector operations in dedicated coprocessor hardware
+This branch includes an experimental **Conformal Geometric Algebra (CGA) ALU coprocessor** in Verilog integrated with the Ibex RISC-V core along with extended instruction set. The GA coprocessor accelerates geometric computations typically performed with matrix/vector arithmetic (in 3D, 4D spacetime, 5D conformal geometry) with single-cycle ops that generalize complex, quaternion, and octonion arithmetic. Applications include 6-DOF robotics, computer graphics transformations, and multiphysics CAD simulation acceleration.
 
 ## Quick Start
 
-Ibex + GA Core are implemented under **examples/ga_system** with ga-specific RTL and overrides of **ibex_decoder.sv**, **ibex_pkg.sv**, etc for GA-specific signals and op code integration with Ibex. This folder also constains test vector generation for randomized and corner case GA op unit tests and GA coprocessor-only testbench. Simulation is done with Verilator.
-
 ```bash
-# Build the complete GA system (Versor + test vectors + Ibex+GA Core)
+# Build the complete Ibex + GACoproc system
 make build-ga-system
 
-# Build and run ga_coproc-only test vector simulation (randomized and corner case unit tests for ADD, SUB, MUL, WEDGE, DOT, REV, DUAL NORM)
-make simulate-ga-system
+# Build and run unit tests on GA ALU only
+make simulate-ga-alu
 
-# Example GA system available at:
+# GA system source:
 # examples/ga_system/
 ```
-
-The GA coprocessor extends Ibex with hardware-accelerated geometric algebra operations, making it suitable for applications requiring efficient 3D transformations, collision detection, and geometric reasoning.
 
 # Ibex RISC-V Core
 
