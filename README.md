@@ -4,11 +4,11 @@ Summary: GA ALU arithmetic unit tests now passing. On to synthesis.
 
 | Component | Status | Progress |
 |-----------|--------|----------|
-| **GA Coprocessor RTL Implementation** | Complete | ![100%] (https://progress-bar.dev/100) |
-| **GA Coprocessor Testbench Implementation** | Complete | ![100%] (https://progress-bar.dev/100) |
-| **GA ALU Testbench Validation** | Complete| ![100%] (https://progress-bar.dev/50) |
-| **GA ALU Synthesis** | In Progress| ![0%] (https://progress-bar.dev/50) |
-| **Ibex + GA Core Integration** | 🔄 In Progress | ![40%] (https://progress-bar.dev/40) |
+| **GA Coprocessor RTL Implementation** | Complete | 100% |
+| **GA Coprocessor Testbench Implementation** | Complete | 100% |
+| **GA ALU Testbench Validation** | Complete| 100% |
+| **GA ALU Synthesis** | In Progress| 0% |
+| **Ibex + GA Core Integration** | In Progress | 40% |
 
 # Geometric Algebra Coprocessor
 
