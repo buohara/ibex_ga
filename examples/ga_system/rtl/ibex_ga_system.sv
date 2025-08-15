@@ -180,10 +180,7 @@ module ibex_ga_system
       end
 
       ga_coprocessor #(
-        .GARegFileSize (GARegFileSize),
-        .GADataWidth   (32),
-        .GAPrecision   (GA_PRECISION_FIXED),
-        .GAAlgebra     (GA_ALGEBRA_5D_CGA)
+        .GARegFileSize (GARegFileSize)
       ) u_ga_coprocessor (
         .clk_i          (clk_i),
         .rst_ni         (rst_ni),

@@ -12,11 +12,7 @@
 module ga_alu
   import ibex_pkg::*;
   import ga_pkg::*;
-#(
-  parameter int unsigned DataWidth    = 32,
-  parameter ga_precision_e Precision  = GA_PRECISION_FIXED,
-  parameter ga_algebra_e Algebra      = GA_ALGEBRA_5D_CGA
-) (
+(
   input  logic                clk_i,
   input  logic                rst_ni,
   input  ga_multivector_t     operand_a_i,
@@ -38,12 +34,7 @@ module ga_alu
   alu_state_e alu_state_q, alu_state_d;
   ga_multivector_t result_d, result_q;
   logic error_d, error_q;
-  logic [DataWidth-1:0] temp_scalar;
-  logic [DataWidth-1:0] temp_vector_x, temp_vector_y, temp_vector_z;
-  logic [DataWidth-1:0] temp_bivector_xy, temp_bivector_xz, temp_bivector_yz;
-  logic [DataWidth-1:0] temp_trivector;
 
-  // Latched operands and operation
   ga_multivector_t a_d, a_q;
   ga_multivector_t b_d, b_q;
   ga_funct_e       op_d, op_q;
@@ -319,12 +310,6 @@ module ga_alu
     
     return x;
   
-  endfunction
-
-  function automatic logic [DataWidth-1:0] packDW(input logic signed [FP_W-1:0] x);
-
-    return {{(DataWidth-FP_W){x[FP_W-1]}}, x};
-
   endfunction
 
   function automatic ga_multivector_t geometricProduct(

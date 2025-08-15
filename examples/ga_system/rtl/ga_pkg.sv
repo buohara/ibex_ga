@@ -1,7 +1,3 @@
-// Copyright lowRISC contributors.
-// Licensed under the Apache License, Version 2.0, see LICENSE for details.
-// SPDX-License-Identifier: Apache-2.0
-
 /**
  * Package with constants and types used by GA coprocessor
  */
@@ -9,6 +5,8 @@
 package ga_pkg;
 
   import ibex_pkg::*;
+
+  parameter bit GA_USE_EVEN = 1'b0;
 
   typedef enum logic [3:0]
   {
@@ -125,6 +123,49 @@ package ga_pkg;
     logic [31:0] ga_cycles_busy;
     logic [31:0] ga_stalls;
   } ga_perf_counters_t;
+
+  typedef struct packed
+  {
+    logic signed [15:0] scalar;
+    logic signed [15:0] e12, e13, e23;
+    logic signed [15:0] e1o, e2o, e3o, e123o;
+    logic signed [15:0] e1i, e2i, e3i, e12i, e13i, e23i, e123i;
+    logic signed [15:0] eoi;
+  } ga_even_multivector_t;
+
+  function automatic ga_even_multivector_t mv_to_even(input ga_multivector_t mv);
+
+    ga_even_multivector_t r;
+    r.scalar = mv.scalar;
+    r.e12    = mv.e12;  r.e13   = mv.e13;   r.e23   = mv.e23;
+    r.e1o    = mv.e1o;  r.e2o   = mv.e2o;   r.e3o   = mv.e3o;   r.e123o = mv.e123o;
+    r.e1i    = mv.e1i;  r.e2i   = mv.e2i;   r.e3i   = mv.e3i;
+    r.e12i   = mv.e12i; r.e13i  = mv.e13i;  r.e23i  = mv.e23i;  r.e123i = mv.e123i;
+    r.eoi    = mv.eoi;
+
+    return r;
+
+  endfunction
+
+  function automatic ga_multivector_t even_to_mv(input ga_even_multivector_t e);
+
+    ga_multivector_t mv = '0;
+    mv.scalar = e.scalar;
+    mv.e12    = e.e12;   mv.e13   = e.e13;   mv.e23   = e.e23;
+    mv.e1o    = e.e1o;   mv.e2o   = e.e2o;   mv.e3o   = e.e3o;   mv.e123o = e.e123o;
+    mv.e1i    = e.e1i;   mv.e2i   = e.e2i;   mv.e3i   = e.e3i;
+    mv.e12i   = e.e12i;  mv.e13i  = e.e13i;  mv.e23i  = e.e23i;  mv.e123i = e.e123i;
+    mv.eoi    = e.eoi;
+
+    return mv;
+
+  endfunction
+
+  function automatic ga_multivector_t mask_even(input ga_multivector_t mv);
+
+    return even_to_mv(mv_to_even(mv));
+
+  endfunction
 
   function automatic logic [2:0] ga_get_grade(ga_multivector_t mv);
     

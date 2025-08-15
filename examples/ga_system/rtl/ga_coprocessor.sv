@@ -2,23 +2,17 @@ module ga_coprocessor
   import ibex_pkg::*;
   import ga_pkg::*;
 #(
-  parameter int unsigned GARegFileSize  = 32,
-  parameter int unsigned GADataWidth    = 512,
-  parameter ga_precision_e GAPrecision  = GA_PRECISION_FIXED,
-  parameter ga_algebra_e GAAlgebra      = GA_ALGEBRA_5D_CGA
+  parameter int unsigned GARegFileSize  = 32
 ) (
   input  logic           clk_i,
   input  logic           rst_ni,
-
   input  ga_req_t        ga_req_i,
   output ga_resp_t       ga_resp_o,
-
   output logic           ga_debug_req_o,
   input  logic           ga_debug_we_i,
   input  logic [4:0]     ga_debug_addr_i,
   input  logic [31:0]    ga_debug_wdata_i,
   output logic [31:0]    ga_debug_rdata_o,
-
   output ga_perf_counters_t ga_perf_o
 );
   logic                           ga_rf_we;
@@ -266,11 +260,8 @@ module ga_coprocessor
 
   assign ga_alu_op = ga_req_q.funct;
 
-  ga_alu #(
-    .DataWidth(GADataWidth),
-    .Precision(GAPrecision),
-    .Algebra(GAAlgebra)
-  ) u_ga_alu (
+  ga_alu u_ga_alu 
+  (
     .clk_i          (clk_i),
     .rst_ni         (rst_ni),
     .operand_a_i    (ga_alu_operand_a),
