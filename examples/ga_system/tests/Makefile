@@ -17,16 +17,26 @@ CXXFLAGS = -std=c++17 -O0 -g3 -Wall -Wextra -DDEBUG
 # Check if Versor is built
 VERSOR_BUILT := $(shell test -f "$(VERSOR_BUILD_DIR)/libvsr.a" && echo "true" || echo "false")
 
+GA_EVEN ?= 0
+NUM_TESTS ?= 200
+
+ifeq ($(GA_EVEN),1)
+VERILATOR_FLAGS += -DGA_EVEN
+GEN_EVEN_FLAG   = -even
+SIM_ARGS        = +GA_EVEN
+else
+GEN_EVEN_FLAG   =
+SIM_ARGS        =
+endif
+
 # Default target - just generate test vectors
 all: test_vectors
 
 # Generate test vectors using Versor CGA as golden reference
-test_vectors: $(VECTORS_DIR)/ga_test_inputs.mem
-
-$(VECTORS_DIR)/ga_test_inputs.mem: generate_test_vectors
-	@echo "Generating CGA test vectors..."
+test_vectors: generate_test_vectors
+	@echo "Generating test vectors (GA_EVEN=$(GA_EVEN))..."
 	@mkdir -p $(VECTORS_DIR)
-	@./generate_test_vectors
+	./generate_test_vectors -n $(NUM_TESTS) $(GEN_EVEN_FLAG)
 
 generate_test_vectors: generate_test_vectors.cpp
 	@echo "Compiling test vector generator..."
@@ -66,7 +76,7 @@ simulate: test_vectors $(RTL_DIR)/*.sv $(TB_DIR)/tb_ga_coprocessor.sv
 		$(RTL_DIR)/ga_register_file.sv \
 		$(TB_DIR)/tb_ga_coprocessor.sv
 	@echo "Executing simulation..."
-	./obj_dir/Vtb_ga_coprocessor $(if $(filter 1,$(WAVES)),+WAVES)
+	./obj_dir/Vtb_ga_coprocessor $(SIM_ARGS) $(if $(filter 1,$(WAVES)),+WAVES)
 	@echo ""
 	@echo "=== Simulation Complete ==="
 	@echo "Results: ga_test_verbose.log"

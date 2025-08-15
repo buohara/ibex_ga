@@ -2,6 +2,7 @@
 #include <random>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <iomanip>
 #include <cmath>
 #include <cstdio>
@@ -2416,6 +2417,26 @@ public:
     }
 };
 
+static CgaMultivector maskEven(const CgaMultivector& mv)
+{
+    // Even indices: 0,6,7,8,9,10,11,12,13,14,15,26,27,28,29,30
+    static const bool keep[32] = {
+        /*0*/ true,
+        /*1*/ false, /*2*/ false, /*3*/ false, /*4*/ false, /*5*/ false,
+        /*6*/ true,  /*7*/ true,  /*8*/ true,
+        /*9*/ true,  /*10*/ true, /*11*/ true,
+        /*12*/ true, /*13*/ true, /*14*/ true, /*15*/ true,
+        /*16*/ false,/*17*/ false,/*18*/ false,/*19*/ false,
+        /*20*/ false,/*21*/ false,/*22*/ false,/*23*/ false,/*24*/ false,/*25*/ false,
+        /*26*/ true, /*27*/ true, /*28*/ true, /*29*/ true, /*30*/ true,
+        /*31*/ false
+    };
+    CgaMultivector r = mv;
+    for (int i = 0; i < CgaMultivector::kNumComponents; ++i)
+        if (!keep[i]) r[i] = 0;
+    return r;
+}
+
 class CgaTestVectorGenerator 
 {
 private:
@@ -2528,7 +2549,7 @@ public:
         }
     }
     
-    void generateTestSuite(int numRandomTests) 
+    void generateTestSuite(int numRandomTests, bool genEvenFiles) 
     {
         const int kCgaComponents = CgaMultivector::kNumComponents;
         const int kMaxCornerTests = 8;
@@ -2538,16 +2559,28 @@ public:
             printf("Warning: Could not create vectors directory\n");
         }
         
-        FILE* inputFile = fopen("vectors/cga_test_inputs.mem", "w");
-        FILE* outputFile = fopen("vectors/cga_test_outputs.mem", "w");
-        FILE* controlFile = fopen("vectors/cga_test_control.mem", "w");
-        
-        if (!inputFile || !outputFile || !controlFile) 
+        FILE* inputFile       = fopen("vectors/cga_test_inputs.mem", "w");
+        FILE* outputFile      = fopen("vectors/cga_test_outputs.mem", "w");
+        FILE* controlFile     = fopen("vectors/cga_test_control.mem", "w");
+        FILE* inputFileEven   = nullptr;
+        FILE* outputFileEven  = nullptr;
+        FILE* controlFileEven = nullptr;
+        if (genEvenFiles) {
+            inputFileEven   = fopen("vectors/cga_test_inputs_even.mem", "w");
+            outputFileEven  = fopen("vectors/cga_test_outputs_even.mem", "w");
+            controlFileEven = fopen("vectors/cga_test_control_even.mem", "w");
+        }
+
+        if (!inputFile || !outputFile || !controlFile ||
+            (genEvenFiles && (!inputFileEven || !outputFileEven || !controlFileEven))) 
         {
             printf("Error: Could not create test vector files\n");
             if (inputFile) fclose(inputFile);
             if (outputFile) fclose(outputFile);
             if (controlFile) fclose(controlFile);
+            if (inputFileEven) fclose(inputFileEven);
+            if (outputFileEven) fclose(outputFileEven);
+            if (controlFileEven) fclose(controlFileEven);
             return;
         }
         
@@ -2625,6 +2658,22 @@ public:
             
             fprintf(controlFile, "%d\n", op);
             testCount++;
+            
+            if (genEvenFiles) {
+                CgaMultivector aEven = maskEven(operandA);
+                CgaMultivector bEven = maskEven(operandB);
+                CgaMultivector expectedEven = computeGoldenReference(
+                    static_cast<GAFunction>(op), aEven, bEven);
+                auto aEvenArr = aEven.toUint16Array();
+                auto bEvenArr = bEven.toUint16Array();
+                auto expEvenArr = expectedEven.toUint16Array();
+                for (int k = 0; k < kCgaComponents; k++) fprintf(inputFileEven, "%04x", aEvenArr[k]);
+                for (int k = 0; k < kCgaComponents; k++) fprintf(inputFileEven, "%04x", bEvenArr[k]);
+                fprintf(inputFileEven, "\n");
+                for (int k = 0; k < kCgaComponents; k++) fprintf(outputFileEven, "%04x", expEvenArr[k]);
+                fprintf(outputFileEven, "\n");
+                fprintf(controlFileEven, "%d\n", op);
+            }
         }
         
         printf("Generated %d CGA test vectors with Q5.11 fixed-point arithmetic\n", testCount);
@@ -2632,31 +2681,52 @@ public:
         fclose(inputFile);
         fclose(outputFile);
         fclose(controlFile);
+        if (genEvenFiles) {
+            fclose(inputFileEven);
+            fclose(outputFileEven);
+            fclose(controlFileEven);
+            printf("Generated even-mode masked duplicates (_even.mem)\n");
+        }
     }
 };
 
 int main(int argc, char* argv[]) 
 {
     int numRandomTests = 200;
-    
-    if (argc > 1) 
-    {
-        numRandomTests = atoi(argv[1]);
-        if (numRandomTests <= 0) 
-        {
-            printf("Error: Invalid number of random tests: %s\n", argv[1]);
-            return 1;
+    bool genEven = false;
+
+    for (int i = 1; i < argc; ++i) {
+        if (!strcmp(argv[i], "-even")) { genEven = true; continue; }
+        if (!strcmp(argv[i], "-n") && i+1 < argc) {
+            numRandomTests = atoi(argv[++i]);
+            continue;
         }
+        if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "--help")) {
+            printf("Usage: %s [-n N] [-even]\n", argv[0]);
+            return 0;
+        }
+        // Backward-compatible: if sole numeric arg
+        if (isdigit(argv[i][0]) || ((argv[i][0]=='-') && isdigit(argv[i][1])))
+            numRandomTests = atoi(argv[i]);
     }
-    
+
+    if (numRandomTests <= 0) {
+        printf("Error: Invalid number of random tests\n");
+        return 1;
+    }
+
     CgaTestVectorGenerator generator;
-    generator.generateTestSuite(numRandomTests);
-    
+    generator.generateTestSuite(numRandomTests, genEven);
+
     printf("\nTest vector generation complete!\n");
     printf("Files generated:\n");
     printf("  - vectors/cga_test_inputs.mem\n");
     printf("  - vectors/cga_test_outputs.mem\n");
     printf("  - vectors/cga_test_control.mem\n");
-    
+    if (genEven) {
+        printf("  - vectors/cga_test_inputs_even.mem\n");
+        printf("  - vectors/cga_test_outputs_even.mem\n");
+        printf("  - vectors/cga_test_control_even.mem\n");
+    }
     return 0;
 }

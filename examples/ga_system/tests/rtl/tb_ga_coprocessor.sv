@@ -309,27 +309,6 @@ module tb_ga_coprocessor;
       test_passed   = (actual_result == expected_result);
       ga_req.valid  = 1'b0;
 
-      if (function_code == GA_FUNCT_NORM) begin
-
-        $display("ga_alu norm: a=%128h, b=%128h, exp=%128h, res=%128h", 
-                 operand_a, operand_b, expected_result, actual_result);
-
-      end
-
-      if (function_code == GA_FUNCT_REV) begin
-
-        $display("ga_alu rev: a=%128h, b=%128h, exp=%128h, res=%128h", 
-                 operand_a, operand_b, expected_result, actual_result);
-
-      end
-
-      if (function_code == GA_FUNCT_DUAL) begin
-
-        $display("ga_alu dual: a=%128h, b=%128h, exp=%128h, res=%128h", 
-                 operand_a, operand_b, expected_result, actual_result);
-
-      end
-
       if (test_passed) begin
 
         pass_count++;
@@ -407,6 +386,13 @@ module tb_ga_coprocessor;
 
     end
 
+  end
+
+  bit use_even;
+  initial begin
+    use_even = 0;
+    if ($test$plusargs("GA_EVEN")) use_even = 1;
+    $display("GA mode: %s", use_even ? "EVEN" : "FULL");
   end
 
 endmodule
